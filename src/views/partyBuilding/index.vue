@@ -1,15 +1,24 @@
 <template>
 <div class="party-container">
     <div id="map_container"></div>
-	<!-- <div class="bottom-circle"></div>
-    <div class="bottom-rectangle"></div> -->
+	<div class="bottom-circle"></div>
+    <div class="bottom-rectangle"></div>
     <div></div>
 
-    <!-- 3个角标 -->
-    <div class="right_top_ranking" @click="RanKing"></div>
-    <div class="right_bot_rules"></div>
-    <div class="left_bot_personal"></div>
-    <!-- /3个角标结束 -->
+    <!-- 4个角标 -->
+    <div class="right_top_ranking corner-icon" @click="RanKing"></div>
+    <div class="right_bot_rules corner-icon" @click="popuPropUp"></div>
+    <div class="left_bot_personal corner-icon" @click="popuOpen"></div>
+    <div class="left_top_info corner-icon" @click="popupInfo"></div>
+    <!-- /4个角标结束 -->
+    <!-- 打卡图标 -->
+    <div class="clock-div">
+        <img v-if="true" src="../../assets/images/partybuild/unableClock.png">  
+        <img v-if="false" src="../../assets/images/partybuild/ableClock.png">  
+        <div v-if="true" class="unableClock-notice">当前范围不可打卡</div>
+        <div v-if="false" class="ableClock-notice">当前范围可打卡</div>
+    </div>
+    <!-- /打卡图标结束 -->
     <!-- 右侧弹框 -->
     <mt-popup
     v-model="popuPright"
@@ -18,7 +27,7 @@
     class="pouUp_R"
     >
         <div class="popuPright_titl">
-            <p>闪闪发光的人民群众</p><span></span>
+            <p>闪闪发光的人民群众</p>
         </div>
         <div class="popuPright_List">
             <span>
@@ -36,10 +45,60 @@
         </div>
          <div class="poRight_List">
             <span>
-
+                <img src="../../assets/images/partybuild/first.png">  
             </span>
             <span>
-                    姓名
+                    丁一
+            </span>
+             <span>
+                6点
+            </span>
+             <span>
+              01:50:32 
+            </span>
+             <span>
+                7篇
+            </span>
+        </div>
+        <div class="poRight_List">
+            <span>
+                <img src="../../assets/images/partybuild/second.png">  
+            </span>
+            <span>
+                    丁一
+            </span>
+             <span>
+                6点
+            </span>
+             <span>
+              01:50:32 
+            </span>
+             <span>
+                7篇
+            </span>
+        </div>
+        <div class="poRight_List">
+            <span>
+                <img src="../../assets/images/partybuild/third.png">  
+            </span>
+            <span>
+                    丁一
+            </span>
+             <span>
+                6点
+            </span>
+             <span>
+              01:50:32 
+            </span>
+             <span>
+                7篇
+            </span>
+        </div>
+        <div class="poRight_List">
+            <span>
+            </span>
+            <span>
+                    丁一
             </span>
              <span>
                 6点
@@ -54,21 +113,119 @@
     </mt-popup>
 
     <!-- /// -->
-    <!-- /// -->
-    <div v-transfer-dom>
-      <popup v-model="popuProp" position="top">
-        <div style="width:200px;">
-            2222222222
+    <!-- //下右弹框/ -->
+    <div v-transfer-dom id="popuPro">
+      <popup v-model="popuProp">
+        <div class="rules">
+            <div class="rules_ovf">
+                <p>
+                    规则一：东方明珠广播电视塔（The Oriental Pearl Radio & TV Tower）是上海的标志性文化景观之一。
+                </p>
+                <p>          
+                    规则二：东方明珠广播电视塔（The Oriental Pearl Radio & TV Tower）是上海的标志性文化景观之一，位于浦东新区陆家嘴，塔高约468米。
+                </p>
+                <p>                
+                    规则三：东方明珠广播电视塔（The Oriental Pearl Radio & TV Tower）是上海的标志性文化景观之一。
+                </p>
+                <p>                
+                    规则三：东方明珠广播电视塔（The Oriental Pearl Radio & TV Tower）是上海的标志性文化景观之一。
+                </p>
+                <p>                
+                    规则三：东方明珠广播电视塔（The Oriental Pearl Radio & TV Tower）是上海的标志性文化景观之一。
+                </p>
+            </div>
+           
         </div>
       </popup>
     </div>
-    <!-- /// -->
+    <!-- //下右弹框结束/ -->
+    <!--  -->
+      <div v-transfer-dom >
+      <popup v-model="persOnal" height="80%">
+          <div class="personal_bk">
+              <div class="persFalse" @click="down">
+                  <img src="../../assets/images/partybuild/false.png">
+              </div>
+              <div class="persName">
+                  嘭嘭嘭
+              </div>
+              <div class="persHead">
+                  <img src="../../assets/images/partybuild/portrait.png">  
+              </div>
+              <div class="persKn_jg">
+                    <div class="persKn" v-for="(article,index) in articleList" v-show="index!=party-1">
+                        <div class="persKn_x">
+                            <cell :title="article.article ">
+                                <rater v-model="article.getNum" :max="article.totalNum" active-color="#FE8B12" disabled></rater>
+                            </cell>
+                        </div>
+                        <div class="persKn_j">
+                            <p v-for="wordsList in article.wordsList" :class="article.wordsList.isGet ? 'wordsClass':'wordsClis'">
+                                {{wordsList.words}}
+                            </p>
+                        </div>
+                    </div>
+              </div>
+
+             
+          </div>
+      </popup>
+    </div>
+
+    <!-- / -->
+    <!-- 打卡成功弹框 -->
+    <div v-transfer-dom>
+        <x-dialog v-model="isGetWords" :hide-on-blur="true">
+            <div class="getwords-dialog">
+                <!-- <img src="../../assets/images/partybuild/getWords.png"> -->
+                <div class="getwords-div">
+                    <div>恭喜你！东方明珠打卡成功</div>
+                    <div>获得金句</div>
+                    <div class="golden-words" v-if="false">获得金句</div>
+                    <div class="golden-words-long">使命愿景：汇聚资本力量，服务实体经济，服务投资大众，服务发展大局；有效维护市场公开公平公正，有效配置国内国际资源，有效防范市场风险；建设成为安全高效，功能完备，与我国社会主义现代化强国相匹配的世界领先交易所。</div>
+                    <div class="golden-article">——《四个意识》</div>
+                </div>
+            </div>
+        </x-dialog>
+    </div>
+    <!-- 打卡成功弹框结束 -->
+    <!-- 未打卡弹框 -->
+    <div v-transfer-dom>
+        <x-dialog v-model="isShowIntro" :hide-on-blur="true">
+            <div class="location-intro">
+                <div class="location-name">东方明珠</div>
+                <div class="location-dis">离我10公里</div>
+                <div>东方明珠广播电视塔是上海的标志性文化景观之一，位于浦东新区陆家嘴，塔高约468米。该建筑于1991年7月兴建，1995年5月投入使用，承担上海6套无线电视发射业务，地区覆盖半径80公里。东方明珠广播电视塔是国家首批AAAAA级旅游景区。</div>
+            </div>
+        </x-dialog>
+    </div>
+    <!-- 未打卡弹框结束 -->
+    <!-- 推送消息弹框 -->
+    <div v-transfer-dom>
+        <x-dialog v-model="isInfo" :hide-on-blur="true">
+            <div class="location-intro">
+                <div>丁一在东方明珠打卡成功！</div>
+                <div>丁一在东方明珠打卡成功！</div>
+                <div>丁一在东方明珠打卡成功！</div>
+                <div>丁一在东方明珠打卡成功！</div>
+                <div>丁一在东方明珠打卡成功！</div>
+                <div>丁一在东方明珠打卡成功！</div>
+                <div>丁一在东方明珠打卡成功！</div>
+                <div>丁一在东方明珠打卡成功！</div>
+                <div>丁一在东方明珠打卡成功！</div>
+                <div>丁一在东方明珠打卡成功！</div>
+            </div>
+        </x-dialog>
+    </div>
+    <!-- 推送消息弹框结束 -->
 </div>
 </template>
 
 <script>
 import markerImg from "../../../static/marker.png";
-import { TransferDom, Popup, Group, Cell, XButton, XSwitch, Toast, XAddress, ChinaAddressData } from 'vux';
+import markerRedImg from "../../../static/marker_red.png";
+import { TransferDom, Popup, Group, Cell, XButton, XSwitch, Toast, XAddress, ChinaAddressData,XDialog } from 'vux';
+import { Rater, Range } from 'vux'
 var self =this;
 var current_lng=0;
 var current_lat=0;
@@ -130,19 +287,28 @@ export default {
     XSwitch,
     Toast,
     XAddress,
-    XButton
+    XButton,
+     Rater,
+    Range,
+    XDialog
   },
   data() {
     return {
+        isInfo:false,
+        isShowIntro:false,
+        isGetWords:false,
         current_lng:0,
         current_lat:0,
         popuPright:false,
-        popuProp:true,
+        popuProp:false,
+        data41:4,
+        persOnal:false,
+        party:8,
         articleList:[{
     articleID: 1,
     article: "四个意识",
     totalNum: 4,
-    getNum: 0,
+    getNum: 1,
     wordsList: [{
             wordsID: 101,
             words: "政治意识",
@@ -169,7 +335,7 @@ export default {
     articleID: 2,
     article: "四个自信",
     totalNum: 4,
-    getNum: 0,
+    getNum: 2,
     wordsList: [{
             wordsID: 201,
             words: "道路自信",
@@ -194,9 +360,9 @@ export default {
 },
 {
     articleID: 3,
-    article: "“五位一体”总体布局",
+    article: "'五位一体'总体布局",
     totalNum:5,
-    getNum: 0,
+    getNum: 3,
     wordsList: [{
             wordsID: 301,
             words: "经济建设",
@@ -225,7 +391,7 @@ export default {
     ]
 },{
     articleID: 4,
-    article: "“四个全面”战略布局",
+    article: "'四个全面'战略布局",
     totalNum:4,
     getNum: 0,
     wordsList: [{
@@ -395,17 +561,39 @@ export default {
         // 需要指定大图的偏移位置，此做法与css sprites技术类似。
         imageOffset: new BMap.Size(0, 0) // 设置图片偏移
         });
+        var myRedIcon = new BMap.Icon(markerRedImg, new BMap.Size(40, 40), {
+        anchor: new BMap.Size(10, 25),
+        imageOffset: new BMap.Size(0, 0) // 设置图片偏移
+        });
         // 创建标注对象并添加到地图
         var marker1 = new BMap.Marker(point1, { icon: myIcon });
         map.addOverlay(marker1);
-        var marker2 = new BMap.Marker(point2, { icon: myIcon });
+        var marker2 = new BMap.Marker(point2, { icon: myRedIcon });
         map.addOverlay(marker2);
         console.log("this.current_lng2",current_lng)
-        marker1.addEventListener("click", function() {
+        // marker1.addEventListener("click", function(e) {
+        //     console.log("e",e)
+        //     console.log("this.current_lng",current_lng)
+        //     let dis =(getDistance(current_lng,current_lat,121.506377,31.245105)/1000).toFixed(2);
+        //     console.log(dis)
+        //     e.isGetWords=true
+        //     self.isGetWords=e.isGetWords
+        //     console.log(e.isGetWords)
+        //     self.computeDistance()
+        // });
+        marker1.addEventListener("click",this.computeDistance );
+        marker2.addEventListener("click",this.showAchievement );
+        
+      },
+      computeDistance(){
+          console.log("test")
             console.log("this.current_lng",current_lng)
             let dis =(getDistance(current_lng,current_lat,121.506377,31.245105)/1000).toFixed(2);
             console.log(dis)
-        });
+            this.isShowIntro=true
+      },
+      showAchievement(){
+          this.isGetWords=true
       },
     OD(a, b, c) {
         while (a > c) a -= c - b;
@@ -427,6 +615,18 @@ export default {
     //右上角点击事件
     RanKing(){
         this.popuPright =true;
+    },
+    popuPropUp(){
+        this.popuProp =true;
+    },
+    down(){
+        this.persOnal =false;
+    },
+    popuOpen(){
+        this.persOnal =true;
+    },
+    popupInfo(){
+        this.isInfo= true;
     }
   },
   mounted() {
@@ -488,6 +688,61 @@ export default {
 </script>
 <style lang="less">
 @import '~vux/src/styles/close.less';
+.clock-div{
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    margin-left: -80px;
+}
+.unableClock-notice{
+    text-align: center;
+    color: #666;
+}
+.ableClock-notice{
+    text-align: center;
+    color: orange;
+}
+.getwords-dialog{
+    background: url(../../assets/images/partybuild/getWords.png) no-repeat;
+    background-size: 100%;
+    color: white;
+    // height: 340px;
+    width: 300px;
+}
+.getwords-div{
+    padding-top:160px; 
+}
+.golden-words-long{
+    color: #F8EC4C;
+    font-size: 16px;
+    // font-weight: 700;
+    width: 260px;
+    margin: 0 auto;
+    text-align: left;
+}
+.golden-words{
+    color: #F8EC4C;
+    font-size: 22px;
+    font-weight: 700;
+    width: 200px;
+    margin: 0 auto;
+}
+.golden-article{
+    padding: 10px;
+}
+.location-intro{
+    padding: 20px;
+    text-align: left;
+    background: #202020;
+    color: white;
+}
+.location-name{
+    font-size: 24px;
+}
+.location-dis{
+    font-size: 20px;
+    margin: 10px 0;
+}
 .popup0 {
   padding-bottom:15px;
   height:200px;
@@ -532,7 +787,7 @@ export default {
 .bottom-circle {
   position: fixed;
   bottom: -20px;
-  height: 160px;
+  height: 200px;
   width: 100%;
   background: white;
   border-radius: 50%;
@@ -540,49 +795,41 @@ export default {
 .bottom-rectangle {
   position: fixed;
   bottom: 0;
-  height: 60px;
+  height: 80px;
   width: 100%;
   background: white;
 }
 // 3个角标
 .right_top_ranking{
-    width: 13%;
-    height:  8%;
-    position: fixed;
     top: 12px;
     right: 8%;
     background: url(../../assets/images/partybuild/ranking.png) no-repeat;
-    background-size: 100%;
-     min-width: 56px;
-    min-height: 56px;
-    max-width: 56px;
-    max-height: 56px;
 }
 .right_bot_rules{
-    width: 13%;
-    height:  8%;
-    min-width: 56px;
-    min-height: 56px;
-    max-width: 56px;
-    max-height: 56px;
-    position: fixed;
     bottom: 12px;
     right: 8%;
     background: url(../../assets/images/partybuild/rules.png) no-repeat;
-    background-size: 100%;
 }
 .left_bot_personal{
-    width: 13%;
-    height:  8%;
-    position: fixed;
     bottom: 12px;
     left: 8%;
     background: url(../../assets/images/partybuild/personal.png) no-repeat;
+}
+.left_top_info{
+    top: 12px;
+    left: 8%;
+    background: url(../../assets/images/partybuild/info.png) no-repeat;
+}
+.corner-icon{
+    width: 13%;
+    height:  8%;
+    position: fixed;
     background-size: 100%;
-     min-width: 56px;
-    min-height: 56px;
-    max-width: 56px;
-    max-height: 56px;
+    min-width: 42px;
+    min-height: 42px;
+    max-width: 42px;
+    max-height:42px;
+    z-index: 1;
 }
 // 右框
 .mint-popup-right{
@@ -594,7 +841,7 @@ export default {
     background: #fff;
 }
 .popuPright_titl{
-    font-size: 16px;
+    font-size: 20px;
     color: #FFFFFF;
     width: 100%;
    
@@ -603,7 +850,7 @@ export default {
 }
 .popuPright_titl p{
     float: left;
-     margin-left: 18%;
+    margin-left: 25%;
 }
 .popuPright_titl span{
      float: left;
@@ -624,7 +871,7 @@ export default {
     line-height: 40px;
     text-align: left;
     color: #fff;
-    font-size: 12px
+    font-size: 14px
 }
 .popuPright_List span:nth-child(odd){
     width: 30%;
@@ -644,7 +891,7 @@ export default {
     height: 40px;
     text-align: left;
     color: #fff;
-    font-size: 12px
+    font-size: 14px
 }
 .poRight_List span:nth-child(odd){
     width: 15%;
@@ -655,4 +902,111 @@ export default {
 .poRight_List span:nth-child(1){
     width: 20%;
 }
+.poRight_List img{
+    padding-left: 20px;
+    padding-top: 6px;
+}
+// 下右框
+#popuPro .vux-popup-dialog {
+  width: 80%;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  margin: 0 auto;
+  background:none
+}
+.rules{
+    width: 100%;
+    margin: 0 auto;
+    background: url(../../assets/images/partybuild/rules_bk.png) no-repeat ;
+    background-size: 100%;
+    padding-top: 50%;
+    padding-bottom: 5%;
+    margin-top: 20%;
+   
+}
+.rules_ovf{
+    height: 240px;
+    overflow-y: auto
+}
+.rules p{
+     width: 90%;
+    margin: 0 auto;
+    font-size: 14px;
+    text-indent: 2em;
+}
+// 左下
+.personal_bk{
+     width: 100%;
+    margin: 0 auto;
+    background:#fff url(../../assets/images/partybuild/personal_bk.png) no-repeat ;
+    background-size: 100% 200px;
+    position: relative;
+}
+.persFalse{
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    width: 35px;
+    height: 35px;
+}
+.persFalse img{
+    display: block;
+    width: 100%;
+}
+.persName{
+    text-align: center;
+    line-height: 50px;
+    font-size: 20px;
+    color: #fff;
+}
+.persHead{
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+}
+.persHead img{
+    display: block;
+    width: 100%;
+}
+.persKn{
+    width: 90%;
+    margin: 0 auto;
+    border:1px dashed #D09292;
+    margin-top: 15px
+}
+.weui-cell .vux-cell-primary{
+     -webkit-box-flex: inherit; 
+     -webkit-flex: inherit; 
+     flex: inherit; 
+     display:block;
+    /* width: 150px; */
+    overflow: hidden;
+    float: left;
+    margin-right: 10px
+}
+.persKn_jg{
+    height:400px;
+    overflow-y:auto;
+    padding-bottom: 10px
+}
+.persKn_j{
+    padding-bottom: 12px
+}
+.persKn_j p{
+    padding-left: 40px;
+    line-height: 25px;
+    margin-top: 5px;
+    padding-right: 8px
+}
+.vux-label{
+    font-size: 18px;
+}
+ .wordsClass{
+     color: #000;
+ }
+ .wordsClis{
+     color: #ccc
+ }
 </style>
