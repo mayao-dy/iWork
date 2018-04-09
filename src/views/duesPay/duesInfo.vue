@@ -13,7 +13,7 @@
             <div class="card-header">{{groupName}}</div>
             <div class="card-year">
               <!--<div class="title">2018年</div>-->
-              <group class="card-month" v-for="item in groupData">
+              <group :key="index" class="card-month" v-for="(item, index) in groupData">
                 <cell is-link :arrow-direction="item.showGroupUnPaid?'up':'down'" @click.native="getUnPaidUser(item.year,item.month,item.orgCode)">
                   <div slot="title">
                     <div class="card-content">

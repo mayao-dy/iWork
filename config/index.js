@@ -10,32 +10,18 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-    	'/PD/api': {
-    		target: 'http://10.112.2.122:9088/',// 党费缴纳 api http://196.131.6.69:9088/
+    	// '/PD/api': {
+    	// 	target: 'http://196.131.6.69:9088/',// 党费缴纳 api http://196.131.6.69:9088/
+    	// 	changeOrigin: true,
+    	// 	pathRewrite: {
+    	// 		'^/PD/api': ''
+    	// 	}
+      // },
+      '/api': {
+    		target: 'http://47.97.26.59/',// 党费缴纳 api http://196.131.6.69:9088/
     		changeOrigin: true,
     		pathRewrite: {
-    			'^/PD/api': ''
-    		}
-    	},
-    	'/shidata': {
-    		target: 'http://195.121.1.90:9217/',//195.121.1.90:   史淳涛ip
-    		changeOrigin: true,
-    		pathRewrite: {
-    			'^/shidata': ''
-    		}
-    	},
-    	'/loginerp': {
-    		target: 'http://195.121.1.90:9218/',//195.121.1.90:   史淳涛ip
-    		changeOrigin: true,
-    		pathRewrite: {
-    			'^/loginerp': ''
-    		}
-    	},
-    	'/common': {
-    		target: 'http://10.112.2.101:9218/',
-    		changeOrigin: true,
-    		pathRewrite: {
-    			'^/common': ''
+    			'^/api': ''
     		}
     	}
     },
@@ -71,7 +57,7 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/PD',
+    assetsPublicPath: '/',
 
     /**
      * Source Maps

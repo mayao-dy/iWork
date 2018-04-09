@@ -23,12 +23,11 @@
           <div class="right_bot_rules corner-icon" @click="getRules"></div>
           <div class="left_bot_personal corner-icon" @click="getAchievement"></div>
           <div class="left_top_info corner-icon" @click="getClockEvent(10)"></div>
-          <div class="left_bot_location corner-icon" @click="getCurrentMap"></div>
           <!-- /4个角标结束 -->
           <!-- 打卡图标 -->
           <div class="clock-div">
-              <img v-if="!isAbleClock" src="../../assets/images/partybuild/unableClock.png">  
-              <img v-if="isAbleClock" src="../../assets/images/partybuild/ableClock.png" @click="postClockPlace">  
+              <img v-if="!isAbleClock" src="../assets/images/partybuild/unableClock.png">  
+              <img v-if="isAbleClock" src="../assets/images/partybuild/ableClock.png" @click="postClockPlace">  
               <div v-if="!isAbleClock" class="unableClock-notice">当前范围不可打卡</div>
               <div v-if="isAbleClock" class="ableClock-notice">当前范围可打卡</div>
           </div>
@@ -44,7 +43,7 @@
                   <p>闪闪发光的人民群众</p>
               </div>
               <div class="persFalse" @click="persdown">
-                        <img src="../../assets/images/partybuild/false.png">
+                        <img src="../assets/images/partybuild/false.png">
               </div>
               <div class="poRight_List">
                   <span></span>
@@ -55,9 +54,9 @@
               </div>
               <div class="poRight_List" :key="index" v-for="(item, index) in rankingList">
                   <span>
-                      <img v-if="item.rank==1" src="../../assets/images/partybuild/first.png">  
-                      <img v-if="item.rank==2" src="../../assets/images/partybuild/second.png"> 
-                      <img v-if="item.rank==3" src="../../assets/images/partybuild/third.png">  
+                      <img v-if="item.rank==1" src="../assets/images/partybuild/first.png">  
+                      <img v-if="item.rank==2" src="../assets/images/partybuild/second.png"> 
+                      <img v-if="item.rank==3" src="../assets/images/partybuild/third.png">  
                   </span>
                   <span>{{item.userName}}</span>
                   <span>{{item.clocked}}点</span>
@@ -68,7 +67,7 @@
           <!-- /// -->
           <!-- //下右弹框/ -->
           <div v-transfer-dom id="popuPro">
-            <x-dialog v-model="popuProp" :hide-on-blur="true">
+            <popup v-model="popuProp">
               <div class="rules">
                   <div class="rules_ovf">
                       <p>
@@ -89,14 +88,14 @@
                   </div>
                 
               </div>
-            </x-dialog>
+            </popup>
           </div>
           <!-- //下右弹框结束/ -->
             <div v-transfer-dom id="popuProe">
             <popup v-model="persOnal">
                 <div class="personal_bk">
                     <div class="persFalse" @click="down">
-                        <img src="../../assets/images/partybuild/false.png">
+                        <img src="../assets/images/partybuild/false.png">
                     </div>
                     <div class="persName">
                         {{userName}}
@@ -131,10 +130,9 @@
           <div v-transfer-dom>
               <x-dialog v-model="isGetWords" :hide-on-blur="true">
                   <div class="getwords-dialog">
-                      <!-- <img src="../../assets/images/partybuild/getWords.png"> -->
+                      <!-- <img src="../assets/images/partybuild/getWords.png"> -->
                       <div class="getwords-div">
-                          <!-- <div>恭喜你！</div> -->
-                          <div>{{select_place}}打卡成功！</div>
+                          <div>恭喜你！{{select_place}}打卡成功</div>
                           <div>获得金句</div>
                           <div class="golden-words" v-if="!select_long">{{select_words}}</div>
                           <div class="golden-words-long" v-if="select_long">使命愿景：汇聚资本力量，服务实体经济，服务投资大众，服务发展大局；有效维护市场公开公平公正，有效配置国内国际资源，有效防范市场风险；建设成为安全高效，功能完备，与我国社会主义现代化强国相匹配的世界领先交易所。</div>
@@ -181,10 +179,10 @@
 </template>
 
 <script>
-import markerImg from "../../../static/marker.png";
-import markerRedImg from "../../../static/marker_red.png";
-import { queryURL, _tokenParams, _username } from "../../utils/index.js";
-import "../../utils/GeoUtils.js";
+import markerImg from "../../static/marker.png";
+import markerRedImg from "../../static/marker_red.png";
+import { queryURL, _tokenParams, _username } from "../utils/index.js";
+import "../utils/GeoUtils.js";
 import {
   TransferDom,
   Popup,
@@ -197,7 +195,7 @@ import {
   ChinaAddressData,
   XDialog,
   InlineLoading,
-  Loading
+  Loading 
 } from "vux";
 import { Rater, Range } from "vux";
 import { Marquee, MarqueeItem } from "vux";
@@ -208,7 +206,7 @@ import {
   getClockEvent,
   postClockPlace,
   handleLogin
-} from "../../api/partyBuilding/index";
+} from "../api/partyBuilding/index";
 import { setInterval } from "timers";
 var self = this;
 var current_lng = 0;
@@ -371,15 +369,15 @@ export default {
     Marquee,
     MarqueeItem,
     InlineLoading,
-    Loading
+    Loading 
   },
   data() {
     return {
       isloading: false,
       containerSeen: true,
-      userId: sessionStorage.getItem("userId"),
-      userName: sessionStorage.getItem("userName"),
-      headUrl: sessionStorage.getItem("headUrl"),
+      userId: "yaoma@sse.com.cn",
+      userName: "",
+      headUrl: "",
       map: new BMap.Map("map_container"),
       refreshLocation: "",
       refreshInfo: "",
@@ -411,9 +409,9 @@ export default {
         {
           place: "上海东方体育中心",
           isClock: false, //是否打过卡
-          longitude: 121.48398, //经度
-          latitude: 31.161852, //纬度
-          point: new BMap.Point(121.48398, 31.161852),
+          longitude: 121.48398131132126, //经度
+          latitude: 31.161853061389003, //纬度
+          point: new BMap.Point(121.48398131132126, 31.161853061389003),
           artNo: 1, //文章id
           artField: 101, //句子id
           details:
@@ -422,9 +420,9 @@ export default {
         {
           place: "佘德耀美术馆",
           isClock: false, //是否打过卡
-          longitude: 121.46834, //经度
-          latitude: 31.176691, //纬度
-          point: new BMap.Point(121.46834, 31.176691),
+          longitude: 121.4683386683464, //经度
+          latitude: 31.176691319055777, //纬度
+          point: new BMap.Point(121.4683386683464, 31.176691319055777),
           artNo: 1, //文章id
           artField: 102, //句子id
           details:
@@ -433,9 +431,9 @@ export default {
         {
           place: "光启龙华港湾",
           isClock: false, //是否打过卡
-          longitude: 121.468264, //经度
-          latitude: 31.183048, //纬度
-          point: new BMap.Point(121.468264, 31.183048),
+          longitude: 121.46826356649399, //经度
+          latitude: 31.183048399723397, //纬度
+          point: new BMap.Point(121.46826356649399, 31.183048399723397),
           artNo: 1, //文章id
           artField: 103, //句子id
           details:
@@ -444,9 +442,9 @@ export default {
         {
           place: "龙美术馆西岸馆",
           isClock: false, //是否打过卡
-          longitude: 121.471366, //经度
-          latitude: 31.190301, //纬度
-          point: new BMap.Point(121.471366, 31.190301),
+          longitude: 121.4713642001152, //经度
+          latitude: 31.19030023696027, //纬度
+          point: new BMap.Point(121.4713642001152, 31.19030023696027),
           artNo: 1, //文章id
           artField: 104, //句子id
           details:
@@ -455,9 +453,9 @@ export default {
         {
           place: "上海绿地万豪酒店",
           isClock: false, //是否打过卡
-          longitude: 121.479334, //经度
-          latitude: 31.197958, //纬度
-          point: new BMap.Point(121.479334, 31.197958),
+          longitude: 121.47933572530746, //经度
+          latitude: 31.197957629582632, //纬度
+          point: new BMap.Point(121.47933572530746, 31.197957629582632),
           artNo: 2, //文章id
           artField: 201, //句子id
           details:
@@ -466,9 +464,9 @@ export default {
         {
           place: "上海世博园",
           isClock: false, //是否打过卡
-          longitude: 121.490812, //经度
-          latitude: 31.192333, //纬度
-          point: new BMap.Point(121.490812, 31.192333),
+          longitude: 121.49081021547318, //经度
+          latitude: 31.192333083330062, //纬度
+          point: new BMap.Point(121.49081021547318, 31.192333083330062),
           artNo: 2, //文章id
           artField: 202, //句子id
           details:
@@ -477,9 +475,9 @@ export default {
         {
           place: "梅赛德斯奔驰文化中心",
           isClock: false, //是否打过卡
-          longitude: 121.499852, //经度
-          latitude: 31.194375, //纬度
-          point: new BMap.Point(121.499852, 31.194375),
+          longitude: 121.49985462427139, //经度
+          latitude: 31.194376068584482, //纬度
+          point: new BMap.Point(121.49985462427139, 31.194376068584482),
           artNo: 2, //文章id
           artField: 203, //句子id
           details:
@@ -488,9 +486,9 @@ export default {
         {
           place: "上海企业联合馆",
           isClock: false, //是否打过卡
-          longitude: 121.49473, //经度
-          latitude: 31.201389, //纬度
-          point: new BMap.Point(121.49473, 31.201389),
+          longitude: 121.49473160505295, //经度
+          latitude: 31.201389642032375, //纬度
+          point: new BMap.Point(121.49473160505295, 31.201389642032375),
           artNo: 2, //文章id
           artField: 204, //句子id
           details:
@@ -499,9 +497,9 @@ export default {
         {
           place: "上海儿童艺术剧场",
           isClock: false, //是否打过卡
-          longitude: 121.500567, //经度
-          latitude: 31.202282, //纬度
-          point: new BMap.Point(121.500567, 31.202282),
+          longitude: 121.50056809186935, //经度
+          latitude: 31.202281863880465, //纬度
+          point: new BMap.Point(121.50056809186935, 31.202281863880465),
           artNo: 3, //文章id
           artField: 301, //句子id
           details:
@@ -510,9 +508,9 @@ export default {
         {
           place: "云餐厅（世博店）",
           isClock: false, //是否打过卡
-          longitude: 121.505454, //经度
-          latitude: 31.206506, //纬度
-          point: new BMap.Point(121.505454, 31.206506),
+          longitude: 121.50545507669449, //经度
+          latitude: 31.20650724405308, //纬度
+          point: new BMap.Point(121.50545507669449, 31.20650724405308),
           artNo: 3, //文章id
           artField: 302, //句子id
           details:
@@ -521,9 +519,9 @@ export default {
         {
           place: "上海世博洲际酒店",
           isClock: false, //是否打过卡
-          longitude: 121.511759, //经度
-          latitude: 31.205054, //纬度
-          point: new BMap.Point(121.511759, 31.205054),
+          longitude: 121.51175826787949, //经度
+          latitude: 31.20505484882878, //纬度
+          point: new BMap.Point(121.51175826787949, 31.20505484882878),
           artNo: 1, //文章id
           artField: 1, //句子id
           details:
@@ -532,9 +530,9 @@ export default {
         {
           place: "老码头",
           isClock: false, //是否打过卡
-          longitude: 121.513785, //经度
-          latitude: 31.222829, //纬度
-          point: new BMap.Point(121.513785, 31.222829),
+          longitude: 121.51378601789474, //经度
+          latitude: 31.222828313598065, //纬度
+          point: new BMap.Point(121.51378601789474, 31.222828313598065),
           artNo: 1, //文章id
           artField: 1, //句子id
           details:
@@ -543,79 +541,13 @@ export default {
         {
           place: "上海外滩英迪格酒店",
           isClock: false, //是否打过卡
-          longitude: 121.506606, //经度
-          latitude: 31.231855, //纬度
-          point: new BMap.Point(121.506606, 31.231855),
+          longitude: 121.50660842657089, //经度
+          latitude: 31.23185445564647, //纬度
+          point: new BMap.Point(121.50660842657089, 31.23185445564647),
           artNo: 1, //文章id
           artField: 1, //句子id
           details:
             " 英迪格酒店，位于外滩南端的十六铺码头，坐拥浦江两岸传统与现代幷蓄的秀丽风光，兼收并蓄，完美融合了真实现代的设计特点与传统的中国元素，在创造灵动有趣的环境同时，又巧妙地将与众不同的现代本土化家居装饰带入设计之中。" //详情
-        },
-        {
-          place: "浦江饭店",
-          isClock: false, //是否打过卡
-          longitude: 121.497609, //经度
-          latitude: 31.250104, //纬度
-          point: new BMap.Point(121.497609, 31.250104),
-          artNo: 1, //文章id
-          artField: 1, //句子id
-          details:
-            " 浦江饭店，是中国第一家西商饭店，坐落于上海著名地标外白渡桥东侧，1990年12月19日，上海证券交易所在浦江饭店内开业。" //详情
-        },
-        {
-          place: "凯石大厦",
-          isClock: false, //是否打过卡
-          longitude: 121.498394, //经度
-          latitude: 31.23843, //纬度
-          point: new BMap.Point(121.498394, 31.23843),
-          artNo: 1, //文章id
-          artField: 1, //句子id
-          details:
-            " 凯石大厦，凯石大厦位于上海黄浦区外滩的中山东一路、中山东二路的分界点。大厦的门牌号（延安东路1号）在延安东路上，因位于中山东二路、延安东路转角处，事实上是中山东二路北端第一幢建筑。" //详情
-        },
-        {
-          place: "陆家浜路渡口",
-          isClock: false, //是否打过卡
-          longitude: 121.510859, //经度
-          latitude: 31.213256, //纬度
-          point: new BMap.Point(121.510859, 31.213256),
-          artNo: 1, //文章id
-          artField: 1, //句子id
-          details:
-            " 陆家浜路渡口" //详情
-        },
-        {
-          place: "后滩公园一号门",
-          isClock: false, //是否打过卡
-          longitude: 121.480273, //经度
-          latitude: 31.189662, //纬度
-          point: new BMap.Point(121.480273, 31.189662),
-          artNo: 1, //文章id
-          artField: 1, //句子id
-          details:
-            " 后滩公园，上海世博后滩湿地公园为上海世博园的核心绿地景观之一，位于黄浦江之东岸之与浦明路之间，南临园区新建浦明路，西至倪家浜，北望卢浦大桥，占地18公顷。" //详情
-        },
-        {
-          place: "环球都会广场",
-          isClock: false, //是否打过卡
-          longitude: 121.479857, //经度
-          latitude: 31.175448, //纬度
-          point: new BMap.Point(121.479857, 31.175448),
-          artNo: 1, //文章id
-          artField: 1, //句子id
-          details:
-            " 环球都会广场" //详情
-        },
-        {
-          place: "上海申语艺术中心",
-          isClock: false, //是否打过卡
-          longitude: 121.479047, //经度
-          latitude: 31.168813, //纬度
-          point: new BMap.Point(121.479047, 31.168813),
-          artNo: 1, //文章id
-          artField: 1, //句子id
-          details:
-            " 上海申语艺术中心" //详情
         }
       ],
       articleList: [
@@ -849,20 +781,9 @@ export default {
       // 百度地图定位功能
       var map = new BMap.Map("map_container");
       var point = new BMap.Point(121.509213, 31.21252);
-      map.centerAndZoom(point, 11);
-      var mapStyle = {
-        style: "normal",
-        styleJson: [{
-                    "featureType": "subway",
-                    "elementType": "all",
-                    "stylers": {
-                              "visibility": "off"
-                    }
-          }]
-      };
-      map.setMapStyle(mapStyle);
+      map.centerAndZoom(point, 12);
       window.map = map; //将map变量存储在全局
-      map.setZoom(14);
+      map.setZoom(13);
       map.enableScrollWheelZoom(); //启用地图滚轮放大缩小
 
       var geolocation = new BMap.Geolocation();
@@ -872,16 +793,16 @@ export default {
             var mk = new BMap.Marker(r.point);
             map.addOverlay(mk);
             //map.panTo(r.point);
-            //map.setCenter(mk);
+
             //alert('您的位置：'+r.point.lng+','+r.point.lat);
             that.current_point = r.point;
 
-            //console.log("r.point", that.current_point);
+            console.log("r.point", that.current_point);
             that.current_lng = r.point.lng;
             that.current_lat = r.point.lat;
-            //测试位置
             // that.current_point = new BMap.Point(
-            //   121.4713642001152, 31.19030023696027
+            //   121.51175826787949,
+            //   31.20505484882878
             // );
             // console.log("that.current_point", that.current_point);
             // that.current_lng = that.current_point.lng;
@@ -891,68 +812,15 @@ export default {
             alert("failed" + this.getStatus());
           }
           // 隐藏
-          that.$vux.loading.hide();
+          that.$vux.loading.hide()
         },
         { enableHighAccuracy: true }
       );
-
+      
       //this.getCurrentPositionB(map);
       this.refreshLocation = setInterval(() => {
         this.getCurrentPositionB(map);
       }, 30000);
-    },
-    getCurrentMap() {
-      let that = this;
-      // 百度地图定位功能
-      var map = new BMap.Map("map_container");
-      var point = new BMap.Point(121.509213, 31.21252);
-      map.centerAndZoom(point, 11);
-      var mapStyle = {
-        style: "normal",
-        styleJson: [{
-                    "featureType": "subway",
-                    "elementType": "all",
-                    "stylers": {
-                              "visibility": "off"
-                    }
-          }]
-      };
-      map.setMapStyle(mapStyle);
-      window.map = map; //将map变量存储在全局
-      map.setZoom(14);
-      map.enableScrollWheelZoom(); //启用地图滚轮放大缩小
-
-      var geolocation = new BMap.Geolocation();
-      geolocation.getCurrentPosition(
-        function(r) {
-          if (this.getStatus() == BMAP_STATUS_SUCCESS) {
-            var mk = new BMap.Marker(r.point);
-            map.addOverlay(mk);
-            map.panTo(r.point);
-            //map.setCenter(mk);
-            //alert('您的位置：'+r.point.lng+','+r.point.lat);
-            that.current_point = r.point;
-
-            //console.log("r.point", that.current_point);
-            that.current_lng = r.point.lng;
-            that.current_lat = r.point.lat;
-            //测试位置
-            // that.current_point = new BMap.Point(
-            //   121.4713642001152, 31.19030023696027
-            // );
-            // console.log("that.current_point", that.current_point);
-            // that.current_lng = that.current_point.lng;
-            // that.current_lat = that.current_point.lat;
-            that.setCheckPosition(map);
-          } else {
-            alert("failed" + this.getStatus());
-          }
-          // 隐藏
-          that.$vux.loading.hide();
-        },
-        { enableHighAccuracy: true }
-      );
-
     },
     getCurrentPositionB(map) {
       let that = this;
@@ -970,17 +838,17 @@ export default {
           if (this.getStatus() == BMAP_STATUS_SUCCESS) {
             var mk = new BMap.Marker(r.point);
             map.addOverlay(mk);
-            //map.panTo(r.point);
+            // map.panTo(r.point);
 
             //alert('您的位置：'+r.point.lng+','+r.point.lat);
             that.current_point = r.point;
 
-            //console.log("r.point", that.current_point);
+            console.log("r.point", that.current_point);
             that.current_lng = r.point.lng;
             that.current_lat = r.point.lat;
-            //测试位置
             // that.current_point = new BMap.Point(
-            //   121.4713642001152, 31.19030023696027
+            //   121.51175826787949,
+            //   31.20505484882878
             // );
             // console.log("that.current_point", that.current_point);
             // that.current_lng = that.current_point.lng;
@@ -993,7 +861,7 @@ export default {
         { enableHighAccuracy: true }
       );
       //console.log("map1", map);
-
+      
       //this.setCheckPosition(map);
     },
     setCheckPosition(map) {
@@ -1003,18 +871,18 @@ export default {
       // var point1 = new BMap.Point(121.506377, 31.245105);
       // var point2 = new BMap.Point(121.509213, 31.21252);
       // var point1 = new BMap.Point(121.48398131132126, 31.161853061389003);//上海东方体育中心
-      // var point2 = new BMap.Point(121.46834, 31.176691);//佘德耀美术馆
-      // var point3 = new BMap.Point(121.468264, 31.183048);//光启龙华港湾
+      // var point2 = new BMap.Point(121.4683386683464, 31.176691319055777);//佘德耀美术馆
+      // var point3 = new BMap.Point(121.46826356649399, 31.183048399723397);//光启龙华港湾
       // var point4 = new BMap.Point(121.4713642001152, 31.19030023696027);//龙美术馆西岸馆
-      // var point5 = new BMap.Point(121.479334, 31.197958);//上海绿地万豪酒店
-      // var point6 = new BMap.Point(121.490812, 31.192333);//上海世博园
-      // var point7 = new BMap.Point(121.499852, 31.194375);//梅赛德斯奔驰文化中心
-      // var point8 = new BMap.Point(121.49473, 31.201389);//上海企业联合馆
-      // var point9 = new BMap.Point(121.500567, 31.202282);//上海儿童艺术剧场
-      // var point10 = new BMap.Point(121.505454, 31.206506);//云餐厅（世博店）
-      // var point11 = new BMap.Point(121.511759, 31.205054);//上海世博洲际酒店
-      // var point12 = new BMap.Point(121.513785, 31.222829);//老码头
-      // var point13 = new BMap.Point(121.506606, 31.231855);//上海外滩英迪格酒店
+      // var point5 = new BMap.Point(121.47933572530746, 31.197957629582632);//上海绿地万豪酒店
+      // var point6 = new BMap.Point(121.49081021547318, 31.192333083330062);//上海世博园
+      // var point7 = new BMap.Point(121.49985462427139, 31.194376068584482);//梅赛德斯奔驰文化中心
+      // var point8 = new BMap.Point(121.49473160505295, 31.201389642032375);//上海企业联合馆
+      // var point9 = new BMap.Point(121.50056809186935, 31.202281863880465);//上海儿童艺术剧场
+      // var point10 = new BMap.Point(121.50545507669449, 31.20650724405308);//云餐厅（世博店）
+      // var point11 = new BMap.Point(121.51175826787949, 31.20505484882878);//上海世博洲际酒店
+      // var point12 = new BMap.Point(121.51378601789474, 31.222828313598065);//老码头
+      // var point13 = new BMap.Point(121.50660842657089, 31.23185445564647);//上海外滩英迪格酒店
 
       var myIcon = new BMap.Icon(markerImg, new BMap.Size(40, 40), {
         // 指定定位位置。
@@ -1056,7 +924,6 @@ export default {
             that.select_place = that.locationInfo[i].place;
             that.select_words = that.locationInfo[i].artNo;
             that.select_article = that.locationInfo[i].artField;
-            that.select_long = that.locationInfo[i].select_long;
             that.showAchievement(that.locationInfo[i].point, map);
           });
         }
@@ -1068,8 +935,6 @@ export default {
           fillOpacity: 0,
           strokeOpacity: 0
         });
-        console.log("this.current_point",this.current_point)
-        console.log("this.pointList[i].point",this.pointList[i].point)
         if (BMapLib.GeoUtils.isPointInCircle(this.pointList[i].point, circle)) {
           mark++;
           console.log("近的点", this.locationInfo[i].place);
@@ -1229,11 +1094,6 @@ export default {
                 y.artNo = this.articleList[x.artNo - 1].wordsList[
                   x.artContentNo - 1
                 ].words;
-                if (x.artNo == 7 && x.artContentNo == 2) {
-                  y.select_long = true;
-                } else {
-                  y.select_long = false;
-                }
               }
             });
           });
@@ -1259,39 +1119,25 @@ export default {
             this.select_article = this.articleList[
               data.resultData.artNo - 1
             ].article;
-            if (
-              data.resultData.artNo == 7 &&
-              data.resultData.artContentNo == 2
-            ) {
-              this.select_long = true;
-            } else {
-              this.select_long = false;
-            }
             if (data.resultData.isAllAct == 0) {
               this.showAchievement();
+              this.getCurrentPositionB();
               this.getClockedPlace();
-              //this.getCurrentPositionB();
-              window.clearInterval(this.refreshLocation);
-              this.initMap();
             } else {
               this.isShowEnd = true;
             }
           } else {
             this.$vux.alert.show({
-              // content: data.errMsg,
-              title: data.errMsg
+              content: data.errMsg,
+              title: "打卡失败！"
             });
           }
           this.isAbleClock = true;
         });
     },
     handleLogin() {
-      //const code = queryURL("code");
-      let url = window.location.href;
-      this.url = url;
-      let search = url.substr(url.indexOf("?"));
-      const code = this.GetQueryString(url, "code", search);
-     // alert("islogining");
+      const code = queryURL("code");
+      //alert("islogining");
       if (code) {
         handleLogin(code)
           .then(res => {
@@ -1305,9 +1151,9 @@ export default {
               sessionStorage.setItem("userName", data.resultData.name || "");
               sessionStorage.setItem("headUrl", data.resultData.headUrl || "");
 
-              this.userId = data.resultData.userId;
-              this.userName = data.resultData.name;
-              this.headUrl = data.resultData.headUrl;
+              this.userId=data.resultData.userId;
+              this.userName=data.resultData.name;
+              this.headUrl=data.resultData.headUrl;
 
               this.containerSeen = true;
 
@@ -1319,7 +1165,6 @@ export default {
               // this.refreshInfo = setInterval(() => {
               //   this.getClockEventMarquee();
               // }, 20000);
-              window.clearInterval(this.refreshLocation);
               this.initMap();
               this.getClockedPlace();
               this.refreshInfo = setInterval(() => {
@@ -1329,41 +1174,25 @@ export default {
               this.containerSeen = false;
               //alert(this.containerSeen);
               this.$vux.alert.show({
-                content: data.errMsg,
-                title: "登录失败！"
-              });
+              content: data.errMsg,
+              title: "登录失败！"
+            });
             }
             this.isloading = false;
           });
       }
-    },
-    GetQueryString(url, name, search) {
-        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-        var r = search.substr(1).match(reg);
-        if (r != null) return unescape(r[2]); return null;
-    },
+    }
   },
   mounted() {
     document.title = "党建活动";
-    this.initMap();
     // 显示
     this.$vux.loading.show({
-      text: "加载中"
-    });
+      text: '加载中'
+    })
     let code = sessionStorage.getItem("code") || "";
-
-    let url = window.location.href;
-    this.url = url;
-    let search = url.substr(url.indexOf("?"));
-    //alert(code)
     if (code) {
-       //alert(1)
       this.isloading = false;
       this.containerSeen = true;
-      this.userId = sessionStorage.getItem("userId");
-      this.userName = sessionStorage.getItem("userName");
-      this.headUrl = sessionStorage.getItem("headUrl");
-      //alert(sessionStorage.getItem("name"))
       // this.getCurrentPositionB();
       // this.refreshLocation = setInterval(() => {
       //   this.getCurrentPositionB();
@@ -1372,20 +1201,16 @@ export default {
       // this.refreshInfo = setInterval(() => {
       //   this.getClockEventMarquee();
       // }, 20000);
-      window.clearInterval(this.refreshLocation);
       this.initMap();
       this.getClockedPlace();
-      this.refreshInfo = setInterval(() => {
-        this.getClockEventMarquee();
-      }, 30000);
+      this.refreshInfo=setInterval(()=>{
+          this.getClockEventMarquee();
+      },30000)
     } else {
-       //alert(2)
-      //let code = queryURL("code");
-      let code = this.GetQueryString(url, "code", search);
-      //alert(code)
+      let code = queryURL("code");
+      //alert(code);
       if (code != null && code.toString().length > 1) {
-        //alert(3)
-        this.handleLogin();
+       this.handleLogin();
       } else {
         this.isloading = false;
         this.containerSeen = false;
@@ -1449,11 +1274,11 @@ export default {
   color: orange;
 }
 .getwords-dialog {
-  background: url(../../assets/images/partybuild/getWords.png) no-repeat;
+  background: url(../assets/images/partybuild/getWords.png) no-repeat;
   background-size: 100%;
   color: white;
   // height: 340px;
-  // width: 300px;
+  width: 300px;
 }
 .getwords-div {
   padding-top: 160px;
@@ -1462,7 +1287,7 @@ export default {
   color: #f8ec4c;
   font-size: 16px;
   // font-weight: 700;
-  width: 90%;
+  width: 260px;
   margin: 0 auto;
   text-align: left;
 }
@@ -1474,7 +1299,7 @@ export default {
   margin: 0 auto;
 }
 .golden-article {
-  padding-bottom: 10px;
+  padding: 10px;
 }
 .location-intro {
   padding: 20px;
@@ -1551,27 +1376,22 @@ export default {
 .right_top_ranking {
   top: 12px;
   right: 8%;
-  background: url(../../assets/images/partybuild/ranking.png) no-repeat;
+  background: url(../assets/images/partybuild/ranking.png) no-repeat;
 }
 .right_bot_rules {
   bottom: 12px;
   right: 8%;
-  background: url(../../assets/images/partybuild/rules.png) no-repeat;
+  background: url(../assets/images/partybuild/rules.png) no-repeat;
 }
 .left_bot_personal {
   bottom: 12px;
   left: 8%;
-  background: url(../../assets/images/partybuild/personal.png) no-repeat;
+  background: url(../assets/images/partybuild/personal.png) no-repeat;
 }
 .left_top_info {
   top: 12px;
   left: 8%;
-  background: url(../../assets/images/partybuild/info.png) no-repeat;
-}
-.left_bot_location{
-  bottom: 120px;
-  left: 2%;
-  background: url(../../assets/images/partybuild/location.png) no-repeat; 
+  background: url(../assets/images/partybuild/info.png) no-repeat;
 }
 .corner-icon {
   width: 13%;
@@ -1609,7 +1429,7 @@ export default {
   float: left;
   width: 40px;
   height: 40px;
-  background: url(../../assets/images/partybuild/ranking.png) no-repeat;
+  background: url(../assets/images/partybuild/ranking.png) no-repeat;
   background-size: 40px;
   margin-top: 24px;
   margin-left: 14px;
@@ -1669,15 +1489,11 @@ export default {
   margin: 0 auto;
   background: none;
 }
-#popuPro .weui-dialog {
-  width: 80%;
-  top: 250px;
-  background: none;
-}
+
 .rules {
   width: 100%;
   margin: 0 auto;
-  background: url(../../assets/images/partybuild/rules_bk.png) no-repeat;
+  background: url(../assets/images/partybuild/rules_bk.png) no-repeat;
   background-size: 100%;
   padding-top: 50%;
   padding-bottom: 5%;
@@ -1700,7 +1516,7 @@ export default {
 .personal_bk {
   width: 100%;
   margin: 0 auto;
-  background: #fff url(../../assets/images/partybuild/personal_bk.png) no-repeat;
+  background: #fff url(../assets/images/partybuild/personal_bk.png) no-repeat;
   background-size: 100% 200px;
   position: relative;
 }
@@ -1784,7 +1600,7 @@ export default {
 }
 //  结束
 .location-end {
-  background: url(../../assets/images/partybuild/end.png) no-repeat;
+  background: url(../assets/images/partybuild/end.png) no-repeat;
   background-size: 100%;
   width: 100%;
   height: 350px;

@@ -58,10 +58,10 @@
   </div>
 </template>
 <script>
-import { InlineLoading } from 'vux'
-import { queryURL, _tokenParams, _username } from '../../utils/index.js'
-import clipboard from 'clipboard'
-import moment from 'moment'
+import { InlineLoading } from "vux";
+import { queryURL, _tokenParams, _username } from "../../utils/index.js";
+import clipboard from "clipboard";
+import moment from "moment";
 import {
   getOrgList,
   getPartyUserInfo,
@@ -69,7 +69,7 @@ import {
   confirmPay,
   getWXUserId,
   getYearMonth
-} from '../../api/partyDues/index'
+} from "../../api/partyDues/index";
 export default {
   components: {
     InlineLoading
@@ -82,171 +82,169 @@ export default {
       partyDuesList: [],
       currentMonth: this.$route.params.month,
       tabData: [],
-      year: moment().format('YYYY'),
-      month: moment().format('M'),
-    }
+      year: moment().format("YYYY"),
+      month: moment().format("M")
+    };
   },
   methods: {
-    showDetail: function (month) {
-      this.currentMonth = month
+    showDetail: function(month) {
+      this.currentMonth = month;
     },
-    sessionStorageSet: function (key, value) {
-      sessionStorage.setItem(key, JSON.stringify(value))
+    sessionStorageSet: function(key, value) {
+      sessionStorage.setItem(key, JSON.stringify(value));
     },
-    sessionStorageGet: function (key, isRemove) {
-      let result = JSON.parse(sessionStorage.getItem(key))
-      isRemove && sessionStorage.removeItem(key)
-      return result
+    sessionStorageGet: function(key, isRemove) {
+      let result = JSON.parse(sessionStorage.getItem(key));
+      isRemove && sessionStorage.removeItem(key);
+      return result;
     },
-    getPartyDuesList: function (userId, status,time) {
+    getPartyDuesList: function(userId, status, time) {
       getPartyDuesList(userId, status)
         .then(res => {
-          return res.data
+          return res.data;
         })
         .then(data => {
-          this.partyDuesList = data.splice(0, 3)
-          if(time){
-            this.openItem(time)
-          }else{
-            let item ={
-              "year":this.partyDuesList[0].year,
-              "month":this.partyDuesList[0].month,
-            }
-            this.openItem(item)
+          this.partyDuesList = data.splice(0, 3);
+          if (time) {
+            this.openItem(time);
+          } else {
+            let item = {
+              year: this.partyDuesList[0].year,
+              month: this.partyDuesList[0].month
+            };
+            this.openItem(item);
           }
-          
-        })
+        });
     },
     openItem(item) {
-      this.currentMonth = item.year + item.month
+      this.currentMonth = item.year + item.month;
     },
     closeItem(item) {
-      this.currentMonth = 'close'
+      this.currentMonth = "close";
     },
     handleConfirm(item) {
-      let self = this
+      let self = this;
       this.$vux.confirm.show({
         // title: data.status,
         content: "确认" + item.month + "月党费已缴纳",
         onConfirm() {
-          self.confirmPay(item)
+          self.confirmPay(item);
         }
-      })
+      });
     },
     confirmPay(item) {
       confirmPay(
-        sessionStorage.getItem('userId'),
+        sessionStorage.getItem("userId"),
         item.month,
         item.year,
         this.userInfo.id +
-        '+' +
-        this.userInfo.name +
-        '+' +
-        item.month +
-        '月+' +
-        item.amt +
-        '元'
+          "+" +
+          this.userInfo.name +
+          "+" +
+          item.month +
+          "月+" +
+          item.amt +
+          "元"
       )
         .then(res => {
-          return res.data
+          return res.data;
         })
         .then(data => {
-          if (data.code == '200') {
+          if (data.code == "200") {
             // this.$vux.confirm.show({
             //   // title: data.status,
             //   content: "确认成功！"
             // })
-            this.getPartyDuesList(sessionStorage.getItem('userId'), '03',item)
+            this.getPartyDuesList(sessionStorage.getItem("userId"), "03", item);
             //this.openItem(item)
           } else {
             this.$vux.alert.show({
               // title: data.status,
               //content: data.desc
               title: "确认失败！"
-            })
+            });
           }
-        })
+        });
     },
     getYearMonth() {
       getYearMonth()
         .then(res => {
-          return res.data
+          return res.data;
         })
         .then(data => {
-          let arr = []
+          let arr = [];
           for (let key in data) {
             for (let i = 0; i < data[key].length; i++) {
               // arr.push({
               //   year:key,
               //   month:data[key][i]
               // });
-              arr.push(key + '-' + data[key][i])
+              arr.push(key + "-" + data[key][i]);
             }
           }
-          this.tabData = arr.sort()
-          this.month = this.tabData[this.tabData.length - 1].split('-')[1]
-          this.year = this.tabData[this.tabData.length - 1].split('-')[0] 
+          this.tabData = arr.sort();
+          this.month = this.tabData[this.tabData.length - 1].split("-")[1];
+          this.year = this.tabData[this.tabData.length - 1].split("-")[0];
 
-          !this.sessionStorageGet('userInfo') &&
-            getPartyUserInfo(sessionStorage.getItem('userId'))
+          !this.sessionStorageGet("userInfo") &&
+            getPartyUserInfo(sessionStorage.getItem("userId"))
               .then(res => {
-                return res.data
+                return res.data;
               })
               .then(data => {
                 if (data) {
-                  this.userInfo = data
-                  this.sessionStorageSet('userInfo', data)
+                  this.userInfo = data;
+                  this.sessionStorageSet("userInfo", data);
                 }
-              })
-          this.userInfo = this.sessionStorageGet('userInfo')
+              });
+          this.userInfo = this.sessionStorageGet("userInfo");
           let time = {
-            "year": this.year,
-            "month": this.month
-          }
-          this.getPartyDuesList(sessionStorage.getItem('userId'), '03', time)
-        })
+            year: this.year,
+            month: this.month
+          };
+          this.getPartyDuesList(sessionStorage.getItem("userId"), "03", time);
+        });
     },
-    handleLogin: function () {
-      const code = queryURL('code')
+    handleLogin: function() {
+      const code = queryURL("code");
       if (code) {
         getWXUserId(code)
           .then(res => {
-            return res.data
+            return res.data;
           })
           .then(data => {
             if (data) {
               //debugger
               //设置code  页面刷新的时候使用
-              sessionStorage.setItem('code', code)
+              sessionStorage.setItem("code", code);
 
-              sessionStorage.setItem('userId', data.userId || '')
-              !this.sessionStorageGet('userInfo') &&
-                getPartyUserInfo(sessionStorage.getItem('userId'))
+              sessionStorage.setItem("userId", data.userId || "");
+              !this.sessionStorageGet("userInfo") &&
+                getPartyUserInfo(sessionStorage.getItem("userId"))
                   .then(res => {
-                    return res.data
+                    return res.data;
                   })
                   .then(data => {
                     if (data) {
-                      this.userInfo = data
-                      this.sessionStorageSet('userInfo', data)
+                      this.userInfo = data;
+                      this.sessionStorageSet("userInfo", data);
                     }
-                  })
-              this.userInfo = this.sessionStorageGet('userInfo')
-              this.getPartyDuesList(sessionStorage.getItem('userId'), '03')
+                  });
+              this.userInfo = this.sessionStorageGet("userInfo");
+              this.getPartyDuesList(sessionStorage.getItem("userId"), "03");
               //this.getYearMonth()
-              this.containerSeen = true
+              this.containerSeen = true;
             } else {
-              this.containerSeen = false
+              this.containerSeen = false;
             }
-            this.isloading = false
-          }
-          )
+            this.isloading = false;
+          });
       }
-    },
+    }
   },
   filters: {
-    toDate: function (payDate) {
-      return moment(payDate).format('YYYY.M.DD')
+    toDate: function(payDate) {
+      return moment(payDate).format("YYYY.M.DD");
     }
   },
   // created() {
@@ -272,43 +270,44 @@ export default {
   //   this.getPartyDuesList(sessionStorage.getItem('userId'), '01')
   // },
   mounted() {
-    document.title = '缴费确认'
+    document.title = "缴费确认";
     // this.getYearMonth()
-    let code = sessionStorage.getItem('code') || ''
+    let code = sessionStorage.getItem("code") || "";
     //alert('seesion|'+code)
     if (code) {
-      this.isloading = false
-      this.containerSeen = true
-      !this.sessionStorageGet('userInfo') &&
-        getPartyUserInfo(sessionStorage.getItem('userId'))
+      this.isloading = false;
+      this.containerSeen = true;
+      !this.sessionStorageGet("userInfo") &&
+        getPartyUserInfo(sessionStorage.getItem("userId"))
           .then(res => {
-            return res.data
+            return res.data;
           })
           .then(data => {
             if (data) {
-              this.userInfo = data
-              this.sessionStorageSet('userInfo', data)
+              this.userInfo = data;
+              this.sessionStorageSet("userInfo", data);
             }
-          })
-      this.userInfo = this.sessionStorageGet('userInfo')
-      this.getPartyDuesList(sessionStorage.getItem('userId'), '03')
+          });
+      this.userInfo = this.sessionStorageGet("userInfo");
+      this.getPartyDuesList(sessionStorage.getItem("userId"), "03");
       //this.getYearMonth()
     } else {
-      let code = queryURL('code')
+      let code = queryURL("code");
+      console.log(code);
       if (code != null && code.toString().length > 1) {
-        this.handleLogin()
+        this.handleLogin();
       } else {
-        this.isloading = false
-        this.containerSeen = false
+        this.isloading = false;
+        this.containerSeen = false;
       }
     }
-    let cb = new clipboard('.clipboard-button')
-    cb.on('success', () => {
-      this.$vux.toast.text('复制成功')
-    })
-    cb.on('error', () => {
-      this.$vux.toast.text('复制失败')
-    })
+    let cb = new clipboard(".clipboard-button");
+    cb.on("success", () => {
+      this.$vux.toast.text("复制成功");
+    });
+    cb.on("error", () => {
+      this.$vux.toast.text("复制失败");
+    });
     // !this.sessionStorageGet('userInfo') &&
     //   getPartyUserInfo(sessionStorage.getItem('userId'))
     //     .then(res => {
@@ -323,10 +322,10 @@ export default {
     // this.userInfo = this.sessionStorageGet('userInfo')
     // this.getPartyDuesList(sessionStorage.getItem('userId'), '01')
   }
-}
+};
 </script>
 <style lang="scss" scoped>
-@import '../../styles/variable.scss';
+@import "../../styles/variable.scss";
 .remark {
   padding: 0 10px !important;
 }

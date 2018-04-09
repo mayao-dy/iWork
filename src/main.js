@@ -11,8 +11,8 @@ import Mint from 'mint-ui';
 import 'mint-ui/lib/style.css'
 Vue.use(Mint);
 
-import { ToastPlugin, AlertPlugin,ConfirmPlugin,TransferDom,Popup} from 'vux';
-Vue.use(ToastPlugin).use(AlertPlugin).use(ConfirmPlugin).use(Popup).use(TransferDom);
+import { ToastPlugin, AlertPlugin,ConfirmPlugin,TransferDom,Popup,LoadingPlugin } from 'vux';
+Vue.use(ToastPlugin).use(AlertPlugin).use(ConfirmPlugin).use(Popup).use(TransferDom).use(LoadingPlugin);
 import { Tab, Tabs } from 'vant';
 Vue.use(Tab).use(Tabs);
 Vue.use(require('vue-wechat-title'))

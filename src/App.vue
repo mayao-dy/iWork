@@ -233,6 +233,7 @@ export default {
   color: $color-gray-9;
   background-color: $color-gray-4;
   height: 100%;
+  overflow: hidden;
 }
 .border-r {
   border-right: 1px solid $color-gray-4;
