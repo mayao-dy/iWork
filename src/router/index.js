@@ -7,11 +7,12 @@ import duesHistory from '@/views/duesPay/duesHistory' // 历史缴费
 import duesInfo from '@/views/duesPay/duesInfo'  // 党费缴纳信息
 
 import partyIndex from '@/views/partyBuilding/index'
+import test from '@/views/partyBuilding/test'
 import Login from '@/views/login'
 Vue.use(Router)
 
 export default new Router({
-	mode: 'history',
+	mode: 'hash',
   routes: [
     {
       path: '/PD/duesPay/duesIndex',
@@ -61,16 +62,19 @@ export default new Router({
         title: '党建活动'
       }
     },
-    {
-      path: '/login',
-      name: 'Login',
-      component: Login,
-      meta: {
-        title: '党建活动'
-      }
-    },
+    // {
+    //   path: '/login',
+    //   name: 'Login',
+    //   component: Login,
+    //   meta: {
+    //     title: '党建活动'
+    //   }
+    // },
     {path: '/', 
     name: 'partyIndex',
-    component: partyIndex}
+    component: partyIndex},
+    {path: '/test', 
+    name: 'test',
+    component: test}
   ]
 })

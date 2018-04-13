@@ -1184,50 +1184,50 @@ export default {
     }
   },
   mounted() {
-    document.title = "党建活动";
-    // 显示
-    this.$vux.loading.show({
-      text: '加载中'
-    })
-    let code = sessionStorage.getItem("code") || "";
-    if (code) {
-      this.isloading = false;
-      this.containerSeen = true;
-      // this.getCurrentPositionB();
-      // this.refreshLocation = setInterval(() => {
-      //   this.getCurrentPositionB();
-      // }, 30000);
-      // this.getClockedPlace();
-      // this.refreshInfo = setInterval(() => {
-      //   this.getClockEventMarquee();
-      // }, 20000);
-      this.initMap();
-      this.getClockedPlace();
-      this.refreshInfo=setInterval(()=>{
-          this.getClockEventMarquee();
-      },30000)
-    } else {
-      let code = queryURL("code");
-      //alert(code);
-      if (code != null && code.toString().length > 1) {
-       this.handleLogin();
-      } else {
-        this.isloading = false;
-        this.containerSeen = false;
-      }
-    }
-    // this.initMap();
-    // this.getClockedPlace();
-    // this.refreshInfo=setInterval(()=>{
-    //     this.getClockEventMarquee();
-    // },20000)
-    // getClockPlaceAll()
-    //     .then(res => {
-    //       return res.data
-    //     })
-    //     .then(data => {
-    //       console.log("data1",data)
-    //     })
+    // document.title = "党建活动";
+    // // 显示
+    // this.$vux.loading.show({
+    //   text: '加载中'
+    // })
+    // let code = sessionStorage.getItem("code") || "";
+    // if (code) {
+    //   this.isloading = false;
+    //   this.containerSeen = true;
+    //   // this.getCurrentPositionB();
+    //   // this.refreshLocation = setInterval(() => {
+    //   //   this.getCurrentPositionB();
+    //   // }, 30000);
+    //   // this.getClockedPlace();
+    //   // this.refreshInfo = setInterval(() => {
+    //   //   this.getClockEventMarquee();
+    //   // }, 20000);
+    //   this.initMap();
+    //   this.getClockedPlace();
+    //   this.refreshInfo=setInterval(()=>{
+    //       this.getClockEventMarquee();
+    //   },30000)
+    // } else {
+    //   let code = queryURL("code");
+    //   //alert(code);
+    //   if (code != null && code.toString().length > 1) {
+    //    this.handleLogin();
+    //   } else {
+    //     this.isloading = false;
+    //     this.containerSeen = false;
+    //   }
+    // }
+    // // this.initMap();
+    // // this.getClockedPlace();
+    // // this.refreshInfo=setInterval(()=>{
+    // //     this.getClockEventMarquee();
+    // // },20000)
+    // // getClockPlaceAll()
+    // //     .then(res => {
+    // //       return res.data
+    // //     })
+    // //     .then(data => {
+    // //       console.log("data1",data)
+    // //     })
   },
   destroyed() {
     window.clearInterval(this.refreshLocation);
@@ -1418,12 +1418,11 @@ export default {
   font-size: 20px;
   color: #ffffff;
   width: 100%;
-  line-height: 87px;
-  margin-top: 20px;
+  margin-top: 70px;
+  margin-bottom: 10px;
 }
 .popuPright_titl p {
-  float: left;
-  margin-left: 15%;
+  text-align: center;
 }
 .popuPright_titl span {
   float: left;
@@ -1467,16 +1466,16 @@ export default {
   font-size: 14px;
 }
 .poRight_List span:nth-child(odd) {
-  width: 20%;
+  width: 20% !important;
 }
 .poRight_List span:nth-child(even) {
-  width: 20%;
+  width: 25% !important;
 }
 .poRight_List span:nth-child(1) {
-  width: 30%;
+  width: 25% !important;
 }
 .poRight_List img {
-  padding-left: 20px;
+  padding-left: 10px;
   padding-top: 6px;
 }
 // 下右框

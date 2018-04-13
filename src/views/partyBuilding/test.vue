@@ -7,6 +7,7 @@
       <!-- <div v-if="!containerSeen" style="padding-top: 200px;text-align: center;color: #999;width: 100%;">进入失败,请重新进入！</div> -->
       <!-- <div v-if="containerSeen"> -->
           <div id="map_container"></div>
+          <div id="container" style="display:none"></div>
         <div class="bottom-circle"></div>
           <div class="bottom-rectangle"></div>
           <!-- <div class="bottom-white">
@@ -51,7 +52,7 @@
                   <span>姓名</span>
                   <span>打卡</span>
                   <!-- <span>耗时</span> -->
-                  <span>知识点</span>
+                  <span>文章</span>
               </div>
               <div class="poRight_List" :key="index" v-for="(item, index) in rankingList">
                   <span>
@@ -61,57 +62,30 @@
                   </span>
                   <span>{{item.userName}}</span>
                   <span>{{item.clocked}}点</span>
-                  <span>{{item.completedArt}}个</span>
+                  <span>{{item.completedArt}}篇</span>
               </div>
           </mt-popup>
 
           <!-- /// -->
           <!-- //下右弹框/ -->
-          <div v-transfer-dom class="popuPro">
+          <div v-transfer-dom id="popuPro">
             <x-dialog v-model="popuProp" :hide-on-blur="true">
               <div class="rules">
                   <div class="rules_ovf">
-                      <p>一、活动规则
+                      <p>
+                          规则一：东方明珠广播电视塔（The Oriental Pearl Radio & TV Tower）是上海的标志性文化景观之一。
+                      </p>
+                      <p>          
+                          规则二：东方明珠广播电视塔（The Oriental Pearl Radio & TV Tower）是上海的标志性文化景观之一，位于浦东新区陆家嘴，塔高约468米。
                       </p>
                       <p>                
-                          1、活动开始：由本所徒步队组织全体参与活动的队员于XX日早上8点30在浦江饭店正门集合统一出发，自行安排徒步路线。
+                          规则三：东方明珠广播电视塔（The Oriental Pearl Radio & TV Tower）是上海的标志性文化景观之一。
                       </p>
                       <p>                
-                          2、活动打卡：
-                      </p>
-                       <p>                
-                          （1）到达19个活动指定打卡点200米范围内时，点击“打卡”，地图上的五角星将变成党徽。
-                      </p>
-                       <p>                
-                          （2）打卡完成后，系统将随机推送并点亮一个党建知识点里的一颗星，打卡越多点亮的星越多。
-                      </p>
-                       <p>                
-                          （3）前18个打卡点，一个点对应一颗星，最后一个打卡点打卡成功后，所有知识点全部点亮。
-                      </p>
-                       <p>二、活动奖励
+                          规则三：东方明珠广播电视塔（The Oriental Pearl Radio & TV Tower）是上海的标志性文化景观之一。
                       </p>
                       <p>                
-                          1、一等奖：8个党建知识点全部点亮，且2日累计步数超过6万步。
-                      </p>
-                      <p>                
-                          2、二等奖：5个党建知识点点亮，且2日累计步数超过4万步。
-                      </p>
-                      <p>                
-                          3、三等奖：3个党建知识点点亮，且2日累计步数超过2万步。
-                      </p>
-                      <p> 三、注意事项
-                      </p>
-                      <p>                
-                          1、有1个党建知识点被隐藏，因此活动平台上只能看到7个知识点。
-                      </p>
-                      <p>                
-                          2、由于徒步距离较长，参加人员应自备行装、舒鞋轻囊，并根据自身的身体状况选择距离。
-                      </p>
-                      <p>                
-                         3、请自行选择计步软件，保存步数截图，以备领奖时核验。
-                      </p>
-                      <p>                
-                         4、徒步路线途径地点会有车辆来往且某些路段狭窄，请自行注意安全。
+                          规则三：东方明珠广播电视塔（The Oriental Pearl Radio & TV Tower）是上海的标志性文化景观之一。
                       </p>
                   </div>
                 
@@ -205,13 +179,6 @@
               </x-dialog>
           </div>
           <!-- /全部打卡结束 -->
-          <!-- //下右弹框/ -->
-          <div v-transfer-dom  class="popupAdver">
-            <x-dialog v-model="popupAdver" :hide-on-blur="true">
-              <div class="adver"></div>
-            </x-dialog>
-          </div>
-          <!-- //下右弹框结束/ -->
       <!-- </div> -->
     <!-- </div> -->
 </div>
@@ -252,73 +219,15 @@ import {
 var self = this;
 var current_lng = 0;
 var current_lat = 0;
-//高德地图
-var mapG, geolocationG,bd_lng,bd_lat;
-//加载地图，调用浏览器定位服务
-mapG = new AMap.Map('container', {
-    resizeEnable: true
-});
+  // //高德地图
+  //     var mapG, geolocationG,bd_lng,bd_lat;
+  //     //加载地图，调用浏览器定位服务
+  //     mapG = new AMap.Map('container', {
+  //         resizeEnable: true
+  //     });
+
 var CryptoJS = require("crypto-js");
 
-
-// // Encrypt
-// var ciphertext = CryptoJS.AES.encrypt('my message', 'secret key 123');
-
-// // Decrypt
-// var bytes  = CryptoJS.AES.decrypt(ciphertext.toString(), 'secret key 123');
-// var plaintext = bytes.toString(CryptoJS.enc.Utf8);
-
-// console.log("--------------------",plaintext);
-
-// const crypto = require('crypto');
-
-// function aesEncrypt(data, key) {
-//     const cipher = crypto.createCipher('aes192', key);
-//     var crypted = cipher.update(data, 'utf8', 'hex');
-//     crypted += cipher.final('hex');
-//     return crypted;
-// }
-
-// function aesDecrypt(encrypted, key) {
-//     const decipher = crypto.createDecipher('aes192', key);
-//     var decrypted = decipher.update(encrypted, 'hex', 'utf8');
-//     decrypted += decipher.final('utf8');
-//     return decrypted;
-// }
-
-// var data = 'test';
-// var key = 'yaoma';
-// var encrypted = aesEncrypt(data, key);
-// var decrypted = aesDecrypt(encrypted, key);
-
-// console.log('Plain text: ' + data);
-// console.log('Encrypted text: ' + encrypted);
-// console.log('Decrypted text: ' + decrypted);
-
-// function encrypt (message, key) {
-//     var keyHex = CryptoJS.enc.Utf8.parse(key);
-//      var encrypted = CryptoJS.AES.encrypt(message, keyHex, {
-//         mode: CryptoJS.mode.ECB,
-//         padding: CryptoJS.pad.Pkcs7
-//     });
-//     return {
-//         key: keyHex,
-//         value: encrypted.toString()
-//     }
-// }
-
-// function decrypt (message, key) {
-//     var plaintext = CryptoJS.AES.decrypt(message, key, {
-//         mode: CryptoJS.mode.ECB,
-//         padding: CryptoJS.pad.Pkcs7
-//     })
-//     return plaintext.toString(CryptoJS.enc.Utf8)
-// }
-
-// var a = encrypt('test', 'yaoma');
-// var b = decrypt(a.value, a.key);
-
-// console.log("_______________",a.value)
 
 // 定义加/解密的 key(key都放这里了, 加密还有啥意义!^_^)
 const initKey = "yaoma";
@@ -394,7 +303,6 @@ const aesDecrypt = (encrypted, key) => {
 // const encrypted = aesEncrypt(data, key);
 // // 控制台输出查看结果
 // console.log("加密结果: ", encrypted);
-var refreshLocation=""
 export default {
   directives: {
     TransferDom
@@ -417,7 +325,6 @@ export default {
   },
   data() {
     return {
-      popupAdver:true,
       pointBD:'',
       currentList:[],
       isloading: false,
@@ -898,32 +805,71 @@ export default {
             bd_lon: bd_lon  
         };  
     },
+    getCurrentGD(){
+      let that = this;
+        //高德地图
+      var mapG, geolocationG;
+      //加载地图，调用浏览器定位服务
+      mapG = new AMap.Map('container', {
+          resizeEnable: true
+      });
+      mapG.plugin('AMap.Geolocation', function() {
+          geolocationG = new AMap.Geolocation({
+              enableHighAccuracy: true,//是否使用高精度定位，默认:true
+              timeout: 10000,          //超过10秒后停止定位，默认：无穷大
+              buttonOffset: new AMap.Pixel(10, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+              zoomToAccuracy: true,      //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+              buttonPosition:'RB'
+          });
+          mapG.addControl(geolocationG);
+          geolocationG.getCurrentPosition();
+          AMap.event.addListener(geolocationG, 'complete',function(data) {
+            console.log(5555)
+            that.pointBD=that.bd_encrypt(data.position.getLng(),data.position.getLat())
+            alert('经度：' + data.position.getLng());
+            alert('纬度：' + data.position.getLat());
+            alert('经度b：' + that.pointBD.bd_lon);
+            alert('纬度b：' + that.pointBD.bd_lat);
+
+          });//返回定位信息
+          AMap.event.addListener(geolocationG, 'error', function(data) {
+            alert(data.info)
+          });      //返回定位出错信息
+      });
+    },
     initMap() {
       let that = this;
-      //高德地图
-      // mapG.plugin('AMap.Geolocation', function() {
-      //     geolocationG = new AMap.Geolocation({
-      //         enableHighAccuracy: true,//是否使用高精度定位，默认:true
-      //         timeout: 10000,          //超过10秒后停止定位，默认：无穷大
-      //         buttonOffset: new AMap.Pixel(10, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
-      //         zoomToAccuracy: true,      //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
-      //         buttonPosition:'RB'
-      //     });
-      //     mapG.addControl(geolocationG);
-      //     geolocationG.getCurrentPosition();
-      //     AMap.event.addListener(geolocationG, 'complete',function(data) {
-      //       that.pointBD=that.bd_encrypt(data.position.getLng(),data.position.getLat())
-      //       // alert('经度：' + data.position.getLng());
-      //       // alert('纬度：' + data.position.getLat());
-      //       // alert('经度b：' + that.pointBD.bd_lon);
-      //       // alert('纬度b：' + that.pointBD.bd_lat);
-      //       bd_lng=that.pointBD.bd_lon;
-      //       bd_lat=that.pointBD.bd_lat;
-      //     });//返回定位信息
-      //     AMap.event.addListener(geolocationG, 'error', function(data) {
-      //       alert(data.info)
-      //     });      //返回定位出错信息
-      // });
+      //   //高德地图
+      var mapG, geolocationG,bd_lng,bd_lat;
+      //加载地图，调用浏览器定位服务
+      mapG = new AMap.Map('container', {
+          resizeEnable: true
+      });
+      mapG.plugin('AMap.Geolocation', function() {
+          geolocationG = new AMap.Geolocation({
+              enableHighAccuracy: true,//是否使用高精度定位，默认:true
+              timeout: 10000,          //超过10秒后停止定位，默认：无穷大
+              buttonOffset: new AMap.Pixel(10, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+              zoomToAccuracy: true,      //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+              buttonPosition:'RB'
+          });
+          mapG.addControl(geolocationG);
+          geolocationG.getCurrentPosition();
+          AMap.event.addListener(geolocationG, 'complete',function(data) {
+            that.pointBD=that.bd_encrypt(data.position.getLng(),data.position.getLat())
+            alert('经度：' + data.position.getLng());
+            alert('纬度：' + data.position.getLat());
+            // alert('经度b：' + that.pointBD.bd_lon);
+            // alert('纬度b：' + that.pointBD.bd_lat);
+            bd_lng=that.pointBD.bd_lon;
+            bd_lat=that.pointBD.bd_lat;
+          });//返回定位信息
+          AMap.event.addListener(geolocationG, 'error', function(data) {
+            alert(data.info)
+          });      //返回定位出错信息
+      });
+
+
       // 百度地图定位功能
       var map = new BMap.Map("map_container");
       var point = new BMap.Point(121.509213, 31.21252);
@@ -951,9 +897,6 @@ export default {
           if (this.getStatus() == BMAP_STATUS_SUCCESS) {
             // r.point = new BMap.Point(
             //   bd_lng, bd_lat
-            // );
-            // r.point = new BMap.Point(
-            //   121.4713642001152, 31.19030023696027
             // );
             // that.currentList.push(r.point);
             // console.log("that.currentList",that.currentList)
@@ -986,21 +929,24 @@ export default {
         { enableHighAccuracy: true }
       );
 
-      //this.getCurrentPositionB(map);
-      // setTimeout(() => {
-      //   that.getCurrentPositionB(map);
-      // },5000)
+      this.getCurrentPositionB(map);
       this.refreshLocation = setInterval(() => {
-        this.getCurrentPositionB(map);
-      }, 20000);
+        this.getCurrentPositionB(map,mapG);
+      }, 30000);
     },
     getCurrentMap() {
        window.clearInterval(this.refreshLocation);
        this.initCurrentMap();
     },
     initCurrentMap() {
-      
       let that = this;
+
+      //高德地图
+      // var mapG, geolocationG,bd_lng,bd_lat;
+      // //加载地图，调用浏览器定位服务
+      // mapG = new AMap.Map('container', {
+      //     resizeEnable: true
+      // });
       mapG.plugin('AMap.Geolocation', function() {
           geolocationG = new AMap.Geolocation({
               enableHighAccuracy: true,//是否使用高精度定位，默认:true
@@ -1015,15 +961,20 @@ export default {
             that.pointBD=that.bd_encrypt(data.position.getLng(),data.position.getLat())
             // alert('经度：' + data.position.getLng());
             // alert('纬度：' + data.position.getLat());
-            // alert('经度b：' + that.pointBD.bd_lon);
-            // alert('纬度b：' + that.pointBD.bd_lat);
+            alert('经度b：' + that.pointBD.bd_lon);
+            alert('纬度b：' + that.pointBD.bd_lat);
             bd_lng=that.pointBD.bd_lon;
             bd_lat=that.pointBD.bd_lat;
           });//返回定位信息
           AMap.event.addListener(geolocationG, 'error', function(data) {
-            //alert(data.info)
+            alert(data.info)
           });      //返回定位出错信息
       });
+
+
+
+
+
       // 百度地图定位功能
       var map = new BMap.Map("map_container");
       var point = new BMap.Point(121.509213, 31.21252);
@@ -1049,15 +1000,9 @@ export default {
       geolocation.getCurrentPosition(
         function(r) {
           if (this.getStatus() == BMAP_STATUS_SUCCESS) {
-            if(bd_lng>100){
-              r.point = new BMap.Point(
-                bd_lng, bd_lat
-              );
-            }
-            
-            // r.point = new BMap.Point(
-            //   121.4713642001152, 31.19030023696027
-            // );
+            r.point = new BMap.Point(
+              bd_lng, bd_lat
+            );
             // that.currentList.push(r.point);
             // console.log("that.currentList",that.currentList)
             // var mk = new BMap.Marker(r.point);
@@ -1162,8 +1107,24 @@ export default {
         var Rand = Math.random();   
         return(Min + Math.round(Rand * Range));   
     } ,
+    onComplete(data) {
+        var str=['定位成功'];
+        str.push('经度：' + data.position.getLng());
+        str.push('纬度：' + data.position.getLat());
+        if(data.accuracy){
+             str.push('精度：' + data.accuracy + ' 米');
+        }//如为IP精确定位结果则没有精度信息
+        str.push('是否经过偏移：' + (data.isConverted ? '是' : '否'));
+    },
     getCurrentPositionB() {
       let that = this;
+      
+      // //高德地图
+      // var mapG, geolocationG,bd_lng,bd_lat;
+      // //加载地图，调用浏览器定位服务
+      // mapG = new AMap.Map('container', {
+      //     resizeEnable: true
+      // });
       mapG.plugin('AMap.Geolocation', function() {
           geolocationG = new AMap.Geolocation({
               enableHighAccuracy: true,//是否使用高精度定位，默认:true
@@ -1178,24 +1139,20 @@ export default {
             that.pointBD=that.bd_encrypt(data.position.getLng(),data.position.getLat())
             // alert('经度：' + data.position.getLng());
             // alert('纬度：' + data.position.getLat());
-            // alert('经度b1：' + that.pointBD.bd_lon);
-            // alert('纬度b1：' + that.pointBD.bd_lat);
+            alert('经度b1：' + that.pointBD.bd_lon);
+            alert('纬度b1：' + that.pointBD.bd_lat);
             bd_lng=that.pointBD.bd_lon;
             bd_lat=that.pointBD.bd_lat;
           });//返回定位信息
           AMap.event.addListener(geolocationG, 'error', function(data) {
-            //alert(data.info)
+            alert(data.info)
           });      //返回定位出错信息
       });
-      //map.clearOverlays(); //清除所有的覆盖物
-      // // 百度地图定位功能
-      // var map = new BMap.Map("map_container");
-      // var point = new BMap.Point(121.509213, 31.21252);
-      // map.centerAndZoom(point, 12);
-      // window.map = map; //将map变量存储在全局
-      // map.setZoom(13);
-      // map.enableScrollWheelZoom(); //启用地图滚轮放大缩小
 
+
+
+
+      //百度地图定位功能
       var geolocation = new BMap.Geolocation();
       geolocation.getCurrentPosition(
         function(r) {
@@ -1218,12 +1175,9 @@ export default {
             
             // let a =(Math.random().toFixed(1))*10
             // r.point=that.locationInfo[a].point
-
-            if(bd_lng>100){
-              r.point = new BMap.Point(
-                bd_lng, bd_lat
-              );
-            }
+            r.point = new BMap.Point(
+              bd_lng, bd_lat
+            );
             var mk = new BMap.Marker(r.point);
             console.log("mk",mk)
             // var mk = new BMap.Marker(r.point);
@@ -1275,12 +1229,12 @@ export default {
       // var point12 = new BMap.Point(121.513785, 31.222829);//老码头
       // var point13 = new BMap.Point(121.506606, 31.231855);//上海外滩英迪格酒店
 
-      var myIcon = new BMap.Icon(markerImg, new BMap.Size(20, 20), {
+      var myIcon = new BMap.Icon(markerImg, new BMap.Size(40, 40), {
         // 指定定位位置。
         // 当标注显示在地图上时，其所指向的地理位置距离图标左上
         // 角各偏移10像素和25像素。您可以看到在本例中该位置即是
         // 图标中央下端的尖角位置。
-        anchor: new BMap.Size(10, 15),
+        anchor: new BMap.Size(10, 25),
         // 设置图片偏移。
         // 当您需要从一幅较大的图片中截取某部分作为标注图标时，您
         // 需要指定大图的偏移位置，此做法与css sprites技术类似。
@@ -1707,7 +1661,7 @@ export default {
       var r = search.substr(1).match(reg);
       if (r != null) return unescape(r[2]);
       return null;
-    }
+    },
   },
   mounted() {
     document.title = "党建活动";
@@ -1722,6 +1676,11 @@ export default {
     this.url = url;
     let search = url.substr(url.indexOf("?"));
     //alert(code)
+
+    sessionStorage.setItem("code", "1");
+    sessionStorage.setItem("userId", "yaoma@sse.com.cn");
+    sessionStorage.setItem("userName", "马瑶");
+
     if (code) {
       //alert(1)
       this.isloading = false;
@@ -2025,7 +1984,7 @@ export default {
   padding-top: 6px;
 }
 // 下右框
-.popuPro .vux-popup-dialog {
+#popuPro .vux-popup-dialog {
   width: 80%;
   top: 0;
   right: 0;
@@ -2034,7 +1993,7 @@ export default {
   margin: 0 auto;
   background: none;
 }
-.popuPro .weui-dialog {
+#popuPro .weui-dialog {
   width: 80%;
   top: 250px;
   background: none;
@@ -2057,23 +2016,6 @@ export default {
   margin: 0 auto;
   font-size: 14px;
   text-indent: 2em;
-  text-align: left;
-}
-.popupAdver .weui-dialog {
-  width: 80%;
-  height: 80%;
-  top: 250px;
-  background: none;
-}
-.adver {
-  height:100%;
-  width: 100%;
-  margin: 0 auto;
-  background: url(../../assets/images/partybuild/adver.png) no-repeat;
-  background-size: 100%;
-  padding-top: 50%;
-  padding-bottom: 5%;
-  margin-top: 20%;
 }
 // 左下
 #popuProe .vux-popup-dialog {
@@ -2186,5 +2128,4 @@ export default {
 .end .weui-dialog {
   background: none;
 }
-
 </style>

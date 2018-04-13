@@ -35,7 +35,7 @@ export function getClockEvent(top) {
  * method: POST
  * url: /v1/clock/place1
  */
-export function postClockPlace(userId, place, longitude, latitude) {
+export function postClockPlaceTest(userId, place, longitude, latitude) {
     let data = qs.stringify({
         userId,
         place,
@@ -48,12 +48,12 @@ export function postClockPlace(userId, place, longitude, latitude) {
  * method: POST
  * url: /v1/clock/place1
  */
-export function postClockPlace1(userId, content) {
+export function postClockPlace(userId, content) {
     let data = qs.stringify({
         userId,
         content
     })
-    return instance.post('/v1/clock/place1', data)
+    return instance.post('/v1/clock/place', data)
 }
 /* name: 用于企业微信用户登陆。
  * method: POST
