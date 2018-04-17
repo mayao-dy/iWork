@@ -72,9 +72,6 @@ export default new Router({
     // },
     {path: '/', 
     name: 'partyIndex',
-    component: partyIndex},
-    {path: '/test', 
-    name: 'test',
-    component: test}
+    component: partyIndex}
   ]
 })

@@ -22,7 +22,7 @@ export function getClockedPlace(userId) {
  * url: /v1/clock/rank/{top}
  */
 export function getClockRank() {
-    return instance.get('/v1/clock/rank/10')
+    return instance.get('/v1/clock/rank/20')
 }
 /* name: 用于获取当前活动事件,要获取全部时top填0。
  * method: GET
@@ -61,4 +61,13 @@ export function postClockPlace(userId, content) {
  */
 export function handleLogin(code) {
     return instance.post('/v1/login/in/' + code)
+}
+/* name: 用于页面获取企业微信js-sdk签名。
+ * method: GET
+ * url: /v1/login/sign
+ */
+export function getLoginSign() {
+    // let url="http://121.40.142.191:8585/"
+    // return instance.get('/v1/login/sign?url=' + url)
+    return instance.get('/v1/login/sign')
 }

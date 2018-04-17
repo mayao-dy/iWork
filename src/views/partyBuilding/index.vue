@@ -130,6 +130,7 @@
                     </div>
                     <div class="persHead">
                         <img :src="headUrl">  
+                        <!-- <img src="../../assets/images/partybuild/portrait.png">   -->
                     </div>
                     <div class="persKn_jg">
                           <div class="persKn" v-for="(article,index) in articleList" :key="index" v-show="index!=party-1">
@@ -208,7 +209,11 @@
           <!-- //下右弹框/ -->
           <div v-transfer-dom  class="popupAdver">
             <x-dialog v-model="popupAdver" :hide-on-blur="true">
-              <div class="adver"></div>
+              <div class="adver">
+                <!-- <p class="end-text">
+                        3
+                    </p> -->
+              </div>
             </x-dialog>
           </div>
           <!-- //下右弹框结束/ -->
@@ -223,6 +228,7 @@ import markerRedImg from "../../../static/marker_red.png";
 import { queryURL, _tokenParams, _username } from "../../utils/index.js";
 import "../../utils/GeoUtils.js";
 import Base64 from "../../utils/base64.js";
+// import "../../utils/wxAPI.js";
 import {
   TransferDom,
   Popup,
@@ -246,20 +252,21 @@ import {
   getClockEvent,
   postClockPlace,
   postClockPlaceTest,
-  handleLogin
+  handleLogin,
+  getLoginSign
 } from "../../api/partyBuilding/index";
+import { setTimeout } from "timers";
 // import { setInterval } from "timers";
 var self = this;
 var current_lng = 0;
 var current_lat = 0;
 //高德地图
-var mapG, geolocationG,bd_lng,bd_lat;
+var mapG, geolocationG, bd_lng, bd_lat;
 //加载地图，调用浏览器定位服务
-mapG = new AMap.Map('container', {
-    resizeEnable: true
-});
+// mapG = new AMap.Map("container", {
+//   resizeEnable: true
+// });
 var CryptoJS = require("crypto-js");
-
 
 // // Encrypt
 // var ciphertext = CryptoJS.AES.encrypt('my message', 'secret key 123');
@@ -394,7 +401,7 @@ const aesDecrypt = (encrypted, key) => {
 // const encrypted = aesEncrypt(data, key);
 // // 控制台输出查看结果
 // console.log("加密结果: ", encrypted);
-var refreshLocation=""
+var refreshLocation = "";
 export default {
   directives: {
     TransferDom
@@ -417,9 +424,14 @@ export default {
   },
   data() {
     return {
-      popupAdver:true,
-      pointBD:'',
-      currentList:[],
+      appId: "", // 必填，随行办公的cropID
+      timestamp: "", // 必填，生成签名的时间戳
+      nonceStr: "", // 必填，生成签名的随机串
+      signature: "", // 必填，签名，见附录1
+      jsApiList: ["getLocation"], // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+      popupAdver: true,
+      pointBD: "",
+      currentList: [],
       isloading: false,
       containerSeen: true,
       userId: sessionStorage.getItem("userId"),
@@ -465,7 +477,7 @@ export default {
             "上海东方体育中心，别名“海上皇冠”，原名上海水上竞技中心，位于上海浦东新区，以水上项目为主的综合性体育场馆。共包括一座1.5万人的主体育馆，5千人的游泳馆和5千人的室外跳水池，总投资约20亿元人民币，于2010年底竣工，该场馆将主要为2011年上海世界游泳锦标赛服务。" //详情
         },
         {
-          place: "佘德耀美术馆",
+          place: "余德耀美术馆",
           isClock: false, //是否打过卡
           longitude: 121.46834, //经度
           latitude: 31.176691, //纬度
@@ -626,7 +638,7 @@ export default {
           point: new BMap.Point(121.510859, 31.213256),
           artNo: 1, //文章id
           artField: 1, //句子id
-          details: " 陆家浜路渡口" //详情
+          details: " 陆家浜路渡口，位于上海市黄浦区外马路1279号" //详情
         },
         {
           place: "后滩公园一号门",
@@ -647,7 +659,7 @@ export default {
           point: new BMap.Point(121.479857, 31.175448),
           artNo: 1, //文章id
           artField: 1, //句子id
-          details: " 环球都会广场" //详情
+          details: " 环球都会广场,位于上海市浦东新区耀元路58号" //详情
         },
         {
           place: "上海申语艺术中心",
@@ -657,7 +669,17 @@ export default {
           point: new BMap.Point(121.479047, 31.168813),
           artNo: 1, //文章id
           artField: 1, //句子id
-          details: " 上海申语艺术中心" //详情
+          details: " 上海申语艺术中心，位于上海市浦东新区耀江路1-10号" //详情
+        },
+        {
+          place: "test",
+          isClock: false, //是否打过卡
+          longitude: 121.517618, //经度
+          latitude: 31.244405, //纬度
+          point: new BMap.Point(121.517618,31.244405),//121.442493,31.168105
+          artNo: 1, //文章id
+          artField: 1, //句子id
+          details: " test" //详情
         }
       ],
       articleList: [
@@ -886,20 +908,80 @@ export default {
     };
   },
   methods: {
-    bd_encrypt(gg_lon, gg_lat){  
-        var X_PI = Math.PI * 3000.0 / 180.0;  
-        var x = gg_lon, y = gg_lat;  
-        var z = Math.sqrt(x * x + y * y) + 0.00002 * Math.sin(y * X_PI);  
-        var theta = Math.atan2(y, x) + 0.000003 * Math.cos(x * X_PI);  
-        var bd_lon = z * Math.cos(theta) + 0.0065;  
-        var bd_lat = z * Math.sin(theta) + 0.006;  
-        return {  
-            bd_lat: bd_lat,  
-            bd_lon: bd_lon  
-        };  
+    bd_encrypt(gg_lon, gg_lat) {
+      var X_PI = Math.PI * 3000.0 / 180.0;
+      var x = gg_lon,
+        y = gg_lat;
+      var z = Math.sqrt(x * x + y * y) + 0.00002 * Math.sin(y * X_PI);
+      var theta = Math.atan2(y, x) + 0.000003 * Math.cos(x * X_PI);
+      var bd_lon = z * Math.cos(theta) + 0.0065;
+      var bd_lat = z * Math.sin(theta) + 0.006;
+      return {
+        bd_lat: bd_lat,
+        bd_lon: bd_lon
+      };
     },
     initMap() {
       let that = this;
+      // 百度地图定位功能
+      var map = new BMap.Map("map_container");
+      var point = new BMap.Point(121.509213, 31.21252);
+      map.centerAndZoom(point, 11);
+      var mapStyle = {
+        style: "normal",
+        styleJson: [
+          {
+            featureType: "subway",
+            elementType: "all",
+            stylers: {
+              visibility: "off"
+            }
+          }
+        ]
+      };
+      map.setMapStyle(mapStyle);
+      window.map = map; //将map变量存储在全局
+      map.setZoom(14);
+      map.enableScrollWheelZoom(); //启用地图滚轮放大缩小
+
+
+      wx.getLocation({
+        type: "gcj02", // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+        success: function(res) {
+          var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+          var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+          var speed = res.speed; // 速度，以米/每秒计
+          var accuracy = res.accuracy; // 位置精度
+          that.pointBD = that.bd_encrypt(longitude, latitude);
+          bd_lng = that.pointBD.bd_lon;
+          bd_lat = that.pointBD.bd_lat;
+          // alert("经度b：" + bd_lng);
+          // alert("纬度b：" + bd_lat);
+          let wxPoint = new BMap.Point(bd_lng, bd_lat);
+          var mk = new BMap.Marker(wxPoint);
+          that.currentList[0] = mk;
+          map.addOverlay(that.currentList[0]);
+          that.current_point = wxPoint;
+          that.current_lng = wxPoint.lng;
+          that.current_lat = wxPoint.lat;
+          that.setCheckPosition(map);
+          that.$vux.loading.hide();
+        },
+        fail: function(res) {
+          //alert("failed")
+        }
+      });
+      // let wxPoint = new BMap.Point(121.505454, 31.206506);
+      // var mk = new BMap.Marker(wxPoint);
+      // that.currentList[0] = mk;
+      // map.addOverlay(that.currentList[0]);
+      // that.current_point = wxPoint;
+      // that.current_lng = wxPoint.lng;
+      // that.current_lat = wxPoint.lat;
+      // that.setCheckPosition(map);
+      // that.$vux.loading.hide();
+      // alert('经度b：' + bd_lng);
+      // alert('纬度b：' + bd_lat);
       //高德地图
       // mapG.plugin('AMap.Geolocation', function() {
       //     geolocationG = new AMap.Geolocation({
@@ -924,201 +1006,15 @@ export default {
       //       alert(data.info)
       //     });      //返回定位出错信息
       // });
-      // 百度地图定位功能
-      var map = new BMap.Map("map_container");
-      var point = new BMap.Point(121.509213, 31.21252);
-      map.centerAndZoom(point, 11);
-      var mapStyle = {
-        style: "normal",
-        styleJson: [
-          {
-            featureType: "subway",
-            elementType: "all",
-            stylers: {
-              visibility: "off"
-            }
-          }
-        ]
-      };
-      map.setMapStyle(mapStyle);
-      window.map = map; //将map变量存储在全局
-      map.setZoom(14);
-      map.enableScrollWheelZoom(); //启用地图滚轮放大缩小
-
-      var geolocation = new BMap.Geolocation();
-      geolocation.getCurrentPosition(
-        function(r) {
-          if (this.getStatus() == BMAP_STATUS_SUCCESS) {
-            // r.point = new BMap.Point(
-            //   bd_lng, bd_lat
-            // );
-            // r.point = new BMap.Point(
-            //   121.4713642001152, 31.19030023696027
-            // );
-            // that.currentList.push(r.point);
-            // console.log("that.currentList",that.currentList)
-            // var mk = new BMap.Marker(r.point);
-            var mk = new BMap.Marker(r.point);
-            that.currentList[0]=mk;
-            map.addOverlay(that.currentList[0]);
-            //map.panTo(r.point);
-            //map.setCenter(mk);
-            //alert('您的位置：'+r.point.lng+','+r.point.lat);
-            that.current_point = r.point;
-
-            //console.log("r.point", that.current_point);
-            that.current_lng = r.point.lng;
-            that.current_lat = r.point.lat;
-            //测试位置
-            // that.current_point = new BMap.Point(
-            //   121.4713642001152, 31.19030023696027
-            // );
-            // console.log("that.current_point", that.current_point);
-            // that.current_lng = that.current_point.lng;
-            // that.current_lat = that.current_point.lat;
-            that.setCheckPosition(map);
-          } else {
-            alert("failed" + this.getStatus());
-          }
-          // 隐藏
-          that.$vux.loading.hide();
-        },
-        { enableHighAccuracy: true }
-      );
-
-      //this.getCurrentPositionB(map);
-      // setTimeout(() => {
-      //   that.getCurrentPositionB(map);
-      // },5000)
-      this.refreshLocation = setInterval(() => {
-        this.getCurrentPositionB(map);
-      }, 20000);
-    },
-    getCurrentMap() {
-       window.clearInterval(this.refreshLocation);
-       this.initCurrentMap();
-    },
-    initCurrentMap() {
       
-      let that = this;
-      mapG.plugin('AMap.Geolocation', function() {
-          geolocationG = new AMap.Geolocation({
-              enableHighAccuracy: true,//是否使用高精度定位，默认:true
-              timeout: 10000,          //超过10秒后停止定位，默认：无穷大
-              buttonOffset: new AMap.Pixel(10, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
-              zoomToAccuracy: true,      //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
-              buttonPosition:'RB'
-          });
-          mapG.addControl(geolocationG);
-          geolocationG.getCurrentPosition();
-          AMap.event.addListener(geolocationG, 'complete',function(data) {
-            that.pointBD=that.bd_encrypt(data.position.getLng(),data.position.getLat())
-            // alert('经度：' + data.position.getLng());
-            // alert('纬度：' + data.position.getLat());
-            // alert('经度b：' + that.pointBD.bd_lon);
-            // alert('纬度b：' + that.pointBD.bd_lat);
-            bd_lng=that.pointBD.bd_lon;
-            bd_lat=that.pointBD.bd_lat;
-          });//返回定位信息
-          AMap.event.addListener(geolocationG, 'error', function(data) {
-            //alert(data.info)
-          });      //返回定位出错信息
-      });
-      // 百度地图定位功能
-      var map = new BMap.Map("map_container");
-      var point = new BMap.Point(121.509213, 31.21252);
-      map.centerAndZoom(point, 11);
-      var mapStyle = {
-        style: "normal",
-        styleJson: [
-          {
-            featureType: "subway",
-            elementType: "all",
-            stylers: {
-              visibility: "off"
-            }
-          }
-        ]
-      };
-      map.setMapStyle(mapStyle);
-      window.map = map; //将map变量存储在全局
-      map.setZoom(14);
-      map.enableScrollWheelZoom(); //启用地图滚轮放大缩小
-
-      var geolocation = new BMap.Geolocation();
-      geolocation.getCurrentPosition(
-        function(r) {
-          if (this.getStatus() == BMAP_STATUS_SUCCESS) {
-            if(bd_lng>100){
-              r.point = new BMap.Point(
-                bd_lng, bd_lat
-              );
-            }
-            
-            // r.point = new BMap.Point(
-            //   121.4713642001152, 31.19030023696027
-            // );
-            // that.currentList.push(r.point);
-            // console.log("that.currentList",that.currentList)
-            // var mk = new BMap.Marker(r.point);
-            var mk = new BMap.Marker(r.point);
-            that.currentList[0]=mk;
-            map.addOverlay(that.currentList[0]);
-            map.panTo(r.point);
-            //map.setCenter(mk);
-            //alert('您的位置：'+r.point.lng+','+r.point.lat);
-            that.current_point = r.point;
-
-            //console.log("r.point", that.current_point);
-            that.current_lng = r.point.lng;
-            that.current_lat = r.point.lat;
-            //测试位置
-            // that.current_point = new BMap.Point(
-            //   121.4713642001152, 31.19030023696027
-            // );
-            // console.log("that.current_point", that.current_point);
-            // that.current_lng = that.current_point.lng;
-            // that.current_lat = that.current_point.lat;
-            that.setCheckPosition(map);
-          } else {
-            alert("failed" + this.getStatus());
-          }
-          // 隐藏
-          that.$vux.loading.hide();
-        },
-        { enableHighAccuracy: true }
-      );
-
-      //this.getCurrentPositionB(map);
-      this.refreshLocation = setInterval(() => {
-        this.getCurrentPositionB(map);
-      }, 30000);
-      // let that = this;
-      // // 百度地图定位功能
-      // var map = new BMap.Map("map_container");
-      // var point = new BMap.Point(121.509213, 31.21252);
-      // map.centerAndZoom(point, 11);
-      // var mapStyle = {
-      //   style: "normal",
-      //   styleJson: [
-      //     {
-      //       featureType: "subway",
-      //       elementType: "all",
-      //       stylers: {
-      //         visibility: "off"
-      //       }
-      //     }
-      //   ]
-      // };
-      // map.setMapStyle(mapStyle);
-      // window.map = map; //将map变量存储在全局
-      // map.setZoom(14);
-      // map.enableScrollWheelZoom(); //启用地图滚轮放大缩小
 
       // var geolocation = new BMap.Geolocation();
       // geolocation.getCurrentPosition(
       //   function(r) {
       //     if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+      //       r.point = new BMap.Point(
+      //         bd_lng, bd_lat
+      //       );
       //       // r.point = new BMap.Point(
       //       //   121.4713642001152, 31.19030023696027
       //       // );
@@ -1126,11 +1022,145 @@ export default {
       //       // console.log("that.currentList",that.currentList)
       //       // var mk = new BMap.Marker(r.point);
       //       var mk = new BMap.Marker(r.point);
-      //       that.currentList[0]=mk;
+      //       that.currentList[0] = mk;
       //       map.addOverlay(that.currentList[0]);
-      //       // var mk = new BMap.Marker(r.point);
-      //       // map.addOverlay(mk);
+      //       //map.panTo(r.point);
+      //       //map.setCenter(mk);
+      //       //alert('您的位置：'+r.point.lng+','+r.point.lat);
+      //       that.current_point = r.point;
 
+      //       //console.log("r.point", that.current_point);
+      //       that.current_lng = r.point.lng;
+      //       that.current_lat = r.point.lat;
+      //       //测试位置
+      //       // that.current_point = new BMap.Point(
+      //       //   121.4713642001152, 31.19030023696027
+      //       // );
+      //       // console.log("that.current_point", that.current_point);
+      //       // that.current_lng = that.current_point.lng;
+      //       // that.current_lat = that.current_point.lat;
+      //       that.setCheckPosition(map);
+      //     } else {
+      //       alert("failed" + this.getStatus());
+      //     }
+      //     // 隐藏
+      //     that.$vux.loading.hide();
+      //   },
+      //   { enableHighAccuracy: true }
+      // );
+
+      map.addEventListener("click", function(){    
+          //alert("click");  
+          that.getCurrentPositionB(map);  
+      });
+      map.addEventListener("dragend", function(){   
+          //alert("drag");    
+          that.getCurrentPositionB(map);
+      });
+      this.refreshLocation = setInterval(() => {
+        this.getCurrentPositionB(map);
+      }, 3000);
+    },
+    getCurrentMap() {
+      window.clearInterval(this.refreshLocation);
+      this.initCurrentMap();
+    },
+    initCurrentMap() {
+      let that = this;
+      // 百度地图定位功能
+      var map = new BMap.Map("map_container");
+      var point = new BMap.Point(121.509213, 31.21252);
+      map.centerAndZoom(point, 11);
+      var mapStyle = {
+        style: "normal",
+        styleJson: [
+          {
+            featureType: "subway",
+            elementType: "all",
+            stylers: {
+              visibility: "off"
+            }
+          }
+        ]
+      };
+      map.setMapStyle(mapStyle);
+      window.map = map; //将map变量存储在全局
+      map.setZoom(14);
+      map.enableScrollWheelZoom(); //启用地图滚轮放大缩小
+
+      wx.getLocation({
+        type: "gcj02", // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+        success: function(res) {
+          var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+          var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+          var speed = res.speed; // 速度，以米/每秒计
+          var accuracy = res.accuracy; // 位置精度
+          that.pointBD = that.bd_encrypt(longitude, latitude);
+          bd_lng = that.pointBD.bd_lon;
+          bd_lat = that.pointBD.bd_lat;
+          // alert('经度b：' + bd_lng);
+          // alert('纬度b：' + bd_lat);
+          let wxPoint = new BMap.Point(bd_lng, bd_lat);
+          var mk = new BMap.Marker(wxPoint);
+          that.currentList[0] = mk;
+          map.addOverlay(that.currentList[0]);
+          map.panTo(wxPoint);
+          that.current_point = wxPoint;
+          that.current_lng = wxPoint.lng;
+          that.current_lat = wxPoint.lat;
+          that.setCheckPosition(map);
+        },
+        fail: function(res) {
+          //alert("failed")
+        }
+      });
+      // alert("经度b：" + bd_lng);
+      // alert("纬度b：" + bd_lat);
+
+      // mapG.plugin("AMap.Geolocation", function() {
+      //   geolocationG = new AMap.Geolocation({
+      //     enableHighAccuracy: true, //是否使用高精度定位，默认:true
+      //     timeout: 10000, //超过10秒后停止定位，默认：无穷大
+      //     buttonOffset: new AMap.Pixel(10, 20), //定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+      //     zoomToAccuracy: true, //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+      //     buttonPosition: "RB"
+      //   });
+      //   mapG.addControl(geolocationG);
+      //   geolocationG.getCurrentPosition();
+      //   AMap.event.addListener(geolocationG, "complete", function(data) {
+      //     that.pointBD = that.bd_encrypt(
+      //       data.position.getLng(),
+      //       data.position.getLat()
+      //     );
+      //     // alert('经度：' + data.position.getLng());
+      //     // alert('纬度：' + data.position.getLat());
+      //     // alert('经度b：' + that.pointBD.bd_lon);
+      //     // alert('纬度b：' + that.pointBD.bd_lat);
+      //     bd_lng = that.pointBD.bd_lon;
+      //     bd_lat = that.pointBD.bd_lat;
+      //   }); //返回定位信息
+      //   AMap.event.addListener(geolocationG, "error", function(data) {
+      //     //alert(data.info)
+      //   }); //返回定位出错信息
+      // });
+
+      // var geolocation = new BMap.Geolocation();
+      // geolocation.getCurrentPosition(
+      //   function(r) {
+      //     if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+      //       if (bd_lng > 100) {
+      //         r.point = new BMap.Point(bd_lng, bd_lat);
+      //       }
+
+      //       // r.point = new BMap.Point(
+      //       //   121.4713642001152, 31.19030023696027
+      //       // );
+      //       // that.currentList.push(r.point);
+      //       // console.log("that.currentList",that.currentList)
+      //       // var mk = new BMap.Marker(r.point);
+      //       var mk = new BMap.Marker(r.point);
+      //       that.currentList[0] = mk;
+      //       map.addOverlay(that.currentList[0]);
       //       map.panTo(r.point);
       //       //map.setCenter(mk);
       //       //alert('您的位置：'+r.point.lng+','+r.point.lat);
@@ -1155,114 +1185,151 @@ export default {
       //   },
       //   { enableHighAccuracy: true }
       // );
+      map.addEventListener("click", function(){    
+          //alert("click 1");  
+          that.getCurrentPositionB(map);  
+      });
+      map.addEventListener("dragend", function(){   
+          //alert("drag 1");    
+          that.getCurrentPositionB(map);
+      });
+      this.refreshLocation = setInterval(() => {
+        this.getCurrentPositionB(map);
+      }, 3000);
     },
-    GetRandomNum(Min,Max)
-    {   
-        var Range = Max - Min;   
-        var Rand = Math.random();   
-        return(Min + Math.round(Rand * Range));   
-    } ,
+    GetRandomNum(Min, Max) {
+      var Range = Max - Min;
+      var Rand = Math.random();
+      return Min + Math.round(Rand * Range);
+    },
     getCurrentPositionB() {
       let that = this;
-      mapG.plugin('AMap.Geolocation', function() {
-          geolocationG = new AMap.Geolocation({
-              enableHighAccuracy: true,//是否使用高精度定位，默认:true
-              timeout: 10000,          //超过10秒后停止定位，默认：无穷大
-              buttonOffset: new AMap.Pixel(10, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
-              zoomToAccuracy: true,      //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
-              buttonPosition:'RB'
-          });
-          mapG.addControl(geolocationG);
-          geolocationG.getCurrentPosition();
-          AMap.event.addListener(geolocationG, 'complete',function(data) {
-            that.pointBD=that.bd_encrypt(data.position.getLng(),data.position.getLat())
-            // alert('经度：' + data.position.getLng());
-            // alert('纬度：' + data.position.getLat());
-            // alert('经度b1：' + that.pointBD.bd_lon);
-            // alert('纬度b1：' + that.pointBD.bd_lat);
-            bd_lng=that.pointBD.bd_lon;
-            bd_lat=that.pointBD.bd_lat;
-          });//返回定位信息
-          AMap.event.addListener(geolocationG, 'error', function(data) {
-            //alert(data.info)
-          });      //返回定位出错信息
-      });
-      //map.clearOverlays(); //清除所有的覆盖物
-      // // 百度地图定位功能
-      // var map = new BMap.Map("map_container");
-      // var point = new BMap.Point(121.509213, 31.21252);
-      // map.centerAndZoom(point, 12);
-      // window.map = map; //将map变量存储在全局
-      // map.setZoom(13);
-      // map.enableScrollWheelZoom(); //启用地图滚轮放大缩小
-
-      var geolocation = new BMap.Geolocation();
-      geolocation.getCurrentPosition(
-        function(r) {
-          if (this.getStatus() == BMAP_STATUS_SUCCESS) {
-            map.removeOverlay(that.currentList[0]);
-            //console.log("r.point", r.point);
-            // r.point=new BMap.Point(
-            //   121.468264, 31.183048
-            // );
-            // var aaa =121+Math.random();
-            // var bbb = 31+Math.random();
-            // var  lo={};
-            // lo.lat= aaa;
-            // lo.lng= bbb;
-            // aaa=aaa.toFixed(6)
-            // bbb=bbb.toFixed(6)
-            // r.point=new BMap.Point(
-            //   aaa,bbb
-            // );
-            
-            // let a =(Math.random().toFixed(1))*10
-            // r.point=that.locationInfo[a].point
-
-            if(bd_lng>100){
-              r.point = new BMap.Point(
-                bd_lng, bd_lat
-              );
-            }
-            var mk = new BMap.Marker(r.point);
-            console.log("mk",mk)
-            // var mk = new BMap.Marker(r.point);
-            that.currentList[0]=mk;
-            map.addOverlay(that.currentList[0]);
-            //map.addOverlay(mk);
-            //map.panTo(r.point);
-
-            //alert('您的位置：'+r.point.lng+','+r.point.lat);
-            that.current_point = r.point;
-
-            that.current_lng = r.point.lng;
-            that.current_lat = r.point.lat;
-            //测试位置
-            // that.current_point = new BMap.Point(
-            //   121.47136, 31.1903002
-            // );
-            // //console.log("that.current_point", that.current_point);
-            // that.current_lng = that.current_point.lng;
-            // that.current_lat = that.current_point.lat;
-            that.getIsClocked(map);
-          } else {
-            alert("failed" + this.getStatus());
-          }
+      wx.getLocation({
+        type: "gcj02", // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+        success: function(res) {
+          var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+          var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+          var speed = res.speed; // 速度，以米/每秒计
+          var accuracy = res.accuracy; // 位置精度
+          that.pointBD = that.bd_encrypt(longitude, latitude);
+          bd_lng = that.pointBD.bd_lon;
+          bd_lat = that.pointBD.bd_lat;
+          //alert('经度b：' + bd_lng);
+          // alert('纬度b：' + bd_lat);
         },
-        { enableHighAccuracy: true }
-      );
-      //console.log("map1", map);
+        fail: function(res) {
+          //alert("failed")
+        }
+      });
+      // alert('经度b：' + bd_lng);
+      // alert('纬度b：' + bd_lat);
+      map.removeOverlay(that.currentList[0]);
+      let wxPoint = new BMap.Point(bd_lng, bd_lat);
+      var mk = new BMap.Marker(wxPoint);
+      that.currentList[0] = mk;
+      map.addOverlay(that.currentList[0]);
+      that.current_point = wxPoint;
+      that.current_lng = wxPoint.lng;
+      that.current_lat = wxPoint.lat;
+      that.getIsClocked(map);
 
-      //this.setCheckPosition(map);
+      // mapG.plugin("AMap.Geolocation", function() {
+      //   geolocationG = new AMap.Geolocation({
+      //     enableHighAccuracy: true, //是否使用高精度定位，默认:true
+      //     timeout: 10000, //超过10秒后停止定位，默认：无穷大
+      //     buttonOffset: new AMap.Pixel(10, 20), //定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+      //     zoomToAccuracy: true, //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+      //     buttonPosition: "RB"
+      //   });
+      //   mapG.addControl(geolocationG);
+      //   geolocationG.getCurrentPosition();
+      //   AMap.event.addListener(geolocationG, "complete", function(data) {
+      //     that.pointBD = that.bd_encrypt(
+      //       data.position.getLng(),
+      //       data.position.getLat()
+      //     );
+      //     // alert('经度：' + data.position.getLng());
+      //     // alert('纬度：' + data.position.getLat());
+      //     // alert('经度b1：' + that.pointBD.bd_lon);
+      //     // alert('纬度b1：' + that.pointBD.bd_lat);
+      //     bd_lng = that.pointBD.bd_lon;
+      //     bd_lat = that.pointBD.bd_lat;
+      //   }); //返回定位信息
+      //   AMap.event.addListener(geolocationG, "error", function(data) {
+      //     //alert(data.info)
+      //   }); //返回定位出错信息
+      // });
+      // //map.clearOverlays(); //清除所有的覆盖物
+      // // // 百度地图定位功能
+      // // var map = new BMap.Map("map_container");
+      // // var point = new BMap.Point(121.509213, 31.21252);
+      // // map.centerAndZoom(point, 12);
+      // // window.map = map; //将map变量存储在全局
+      // // map.setZoom(13);
+      // // map.enableScrollWheelZoom(); //启用地图滚轮放大缩小
+
+      // var geolocation = new BMap.Geolocation();
+      // geolocation.getCurrentPosition(
+      //   function(r) {
+      //     if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+      //       map.removeOverlay(that.currentList[0]);
+      //       //console.log("r.point", r.point);
+      //       // r.point=new BMap.Point(
+      //       //   121.468264, 31.183048
+      //       // );
+      //       // var aaa =121+Math.random();
+      //       // var bbb = 31+Math.random();
+      //       // var  lo={};
+      //       // lo.lat= aaa;
+      //       // lo.lng= bbb;
+      //       // aaa=aaa.toFixed(6)
+      //       // bbb=bbb.toFixed(6)
+      //       // r.point=new BMap.Point(
+      //       //   aaa,bbb
+      //       // );
+
+      //       // let a =(Math.random().toFixed(1))*10
+      //       // r.point=that.locationInfo[a].point
+
+      //       if (bd_lng > 100) {
+      //         r.point = new BMap.Point(bd_lng, bd_lat);
+      //       }
+      //       var mk = new BMap.Marker(r.point);
+      //       //console.log("mk",mk)
+      //       // var mk = new BMap.Marker(r.point);
+      //       that.currentList[0] = mk;
+      //       map.addOverlay(that.currentList[0]);
+      //       //map.addOverlay(mk);
+      //       //map.panTo(r.point);
+
+      //       //alert('您的位置：'+r.point.lng+','+r.point.lat);
+      //       that.current_point = r.point;
+
+      //       that.current_lng = r.point.lng;
+      //       that.current_lat = r.point.lat;
+      //       //测试位置
+      //       // that.current_point = new BMap.Point(
+      //       //   121.47136, 31.1903002
+      //       // );
+      //       // //console.log("that.current_point", that.current_point);
+      //       // that.current_lng = that.current_point.lng;
+      //       // that.current_lat = that.current_point.lat;
+      //       that.getIsClocked(map);
+      //     } else {
+      //       alert("failed" + this.getStatus());
+      //     }
+      //   },
+      //   { enableHighAccuracy: true }
+      // );
     },
     setCheckPosition(map) {
-      //onsole.log("map2", map);
+      //console.log("map2", map);
 
       let that = this;
       // var point1 = new BMap.Point(121.506377, 31.245105);
       // var point2 = new BMap.Point(121.509213, 31.21252);
       // var point1 = new BMap.Point(121.48398131132126, 31.161853061389003);//上海东方体育中心
-      // var point2 = new BMap.Point(121.46834, 31.176691);//佘德耀美术馆
+      // var point2 = new BMap.Point(121.46834, 31.176691);//余德耀美术馆
       // var point3 = new BMap.Point(121.468264, 31.183048);//光启龙华港湾
       // var point4 = new BMap.Point(121.4713642001152, 31.19030023696027);//龙美术馆西岸馆
       // var point5 = new BMap.Point(121.479334, 31.197958);//上海绿地万豪酒店
@@ -1485,6 +1552,7 @@ export default {
             });
             this.party = 9;
           }
+          
         });
     },
     getClockEvent(top) {
@@ -1539,6 +1607,8 @@ export default {
           });
 
           console.log("this.locationInfo", this.locationInfo);
+          window.clearInterval(this.refreshLocation);
+          this.initMap();
         });
     },
     postClockPlace() {
@@ -1548,69 +1618,29 @@ export default {
       let longitude = this.current_lng.toFixed(6);
       let latitude = this.current_lat.toFixed(6);
       let content = place + "&&" + longitude + "&&" + latitude;
-      //console.log("加密: ", content);
-      let key ="yaoma@sse.com.cn";
-      //  console.log(key) 
-      var b = new Base64();  
-      key = b.encode(key); 
-      //console.log(key) 
+      console.log("加密: ", content);
+      let key = userId;
+      //  console.log(key)
+      var b = new Base64();
+      key = b.encode(key);
+      //console.log(key)
       // 获取填充后的key
-     
+
       if (key.length >= 16) {
         key = key.substring(0, 16);
       } else {
         var str0 = "0000000000000000";
-        key = (key+str0).substring(0,16);
+        key = (key + str0).substring(0, 16);
       }
-      //console.log(key) 
+      console.log(key)
       key = CryptoJS.enc.Utf8.parse(fillKey(key));
       // 定义需要加密的数据
       const data = content;
       // 调用加密函数
       let encrypted = aesEncrypt(data, key);
       // 控制台输出查看结果
-      //console.log("加密结果: ", encrypted);
-      // postClockPlace(userId, encrypted)
-      //   .then(res => {
-      //     return res.data;
-      //   })
-      //   .then(data => {
-      //     if (data.errCode == 0) {
-      //       this.select_place = data.resultData.place;
-      //       this.select_words = this.articleList[
-      //         data.resultData.artNo - 1
-      //       ].wordsList[data.resultData.artContentNo - 1].words;
-      //       this.select_article = this.articleList[
-      //         data.resultData.artNo - 1
-      //       ].article;
-      //       if (
-      //         data.resultData.artNo == 7 &&
-      //         data.resultData.artContentNo == 2
-      //       ) {
-      //         this.select_long = true;
-      //       } else {
-      //         this.select_long = false;
-      //       }
-      //       if (data.resultData.isAllAct == 0) {
-      //         this.showAchievement();
-      //       } else {
-      //         this.isShowEnd = true;
-      //       }
-      //       this.getClockedPlace();
-      //       //this.getCurrentPositionB();
-      //       window.clearInterval(this.refreshLocation);
-      //       this.initMap();
-      //     } else {
-            // // this.$vux.alert.show({
-            // //   // content: data.errMsg,
-            // //   title: data.errMsg
-            // // });
-            // // 显示文字
-            // this.$vux.toast.text(data.errMsg, "middle");
-      //     }
-      //     this.isAbleClock = true;
-      //   });
-      postClockPlaceTest(userId, place, longitude, latitude)
+      console.log("加密结果: ", encrypted);
+      postClockPlace(userId, encrypted)
         .then(res => {
           return res.data;
         })
@@ -1637,8 +1667,8 @@ export default {
               this.isShowEnd = true;
             }
             this.getClockedPlace();
-            window.clearInterval(this.refreshLocation);
-            this.initMap();
+            // window.clearInterval(this.refreshLocation);
+            // this.initMap();
           } else {
             // this.$vux.alert.show({
             //   // content: data.errMsg,
@@ -1649,6 +1679,45 @@ export default {
           }
           this.isAbleClock = true;
         });
+      // postClockPlaceTest(userId, place, longitude, latitude)
+      //   .then(res => {
+      //     return res.data;
+      //   })
+      //   .then(data => {
+      //     if (data.errCode == 0) {
+      //       this.select_place = data.resultData.place;
+      //       this.select_words = this.articleList[
+      //         data.resultData.artNo - 1
+      //       ].wordsList[data.resultData.artContentNo - 1].words;
+      //       this.select_article = this.articleList[
+      //         data.resultData.artNo - 1
+      //       ].article;
+      //       if (
+      //         data.resultData.artNo == 7 &&
+      //         data.resultData.artContentNo == 2
+      //       ) {
+      //         this.select_long = true;
+      //       } else {
+      //         this.select_long = false;
+      //       }
+      //       if (data.resultData.isAllAct == 0) {
+      //         this.showAchievement();
+      //       } else {
+      //         this.isShowEnd = true;
+      //       }
+      //       this.getClockedPlace();
+      //       window.clearInterval(this.refreshLocation);
+      //       this.initMap();
+      //     } else {
+      //       // this.$vux.alert.show({
+      //       //   // content: data.errMsg,
+      //       //   title: data.errMsg
+      //       // });
+      //       // 显示文字
+      //       this.$vux.toast.text(data.errMsg, "middle");
+      //     }
+      //     this.isAbleClock = true;
+      //   });
     },
     handleLogin() {
       //const code = queryURL("code");
@@ -1665,6 +1734,7 @@ export default {
           .then(data => {
             //alert(data.errCode);
             if (data.errCode == 0) {
+              
               sessionStorage.setItem("code", code);
               sessionStorage.setItem("userId", data.resultData.userId || "");
               sessionStorage.setItem("userName", data.resultData.name || "");
@@ -1676,20 +1746,15 @@ export default {
 
               this.containerSeen = true;
 
-              // this.getCurrentPositionB();
-              // this.refreshLocation = setInterval(() => {
-              //   this.getCurrentPositionB();
-              // }, 30000);
+
+              this.getLoginSign();
+
+
+              //this.initMap();
               // this.getClockedPlace();
               // this.refreshInfo = setInterval(() => {
               //   this.getClockEventMarquee();
               // }, 20000);
-              window.clearInterval(this.refreshLocation);
-              this.initMap();
-              this.getClockedPlace();
-              this.refreshInfo = setInterval(() => {
-                this.getClockEventMarquee();
-              }, 20000);
             } else {
               this.containerSeen = false;
               //alert(this.containerSeen);
@@ -1701,6 +1766,32 @@ export default {
             this.isloading = false;
           });
       }
+    },
+    getLoginSign() {
+      let that = this;
+      getLoginSign()
+        .then(res => {
+          return res.data;
+        })
+        .then(data => {
+          wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: data.resultData.corpId, // 必填，随行办公的cropID
+            timestamp: data.resultData.timestamp, // 必填，生成签名的时间戳
+            nonceStr: data.resultData.nonceStr, // 必填，生成签名的随机串
+            signature: data.resultData.signature, // 必填，签名，见附录1
+            jsApiList: ["getLocation", "chooseImage"] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+          });
+          wx.ready(function() {
+            // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
+
+            //that.initMap();
+            that.getClockedPlace();
+            // that.refreshInfo = setInterval(() => {
+            //   that.getClockEventMarquee();
+            // }, 20000);
+          });
+        });
     },
     GetQueryString(url, name, search) {
       var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
@@ -1716,6 +1807,11 @@ export default {
     this.$vux.loading.show({
       text: "加载中"
     });
+
+    setTimeout(() => {
+      this.popupAdver = false;
+    }, 3000);
+
     let code = sessionStorage.getItem("code") || "";
 
     let url = window.location.href;
@@ -1723,27 +1819,19 @@ export default {
     let search = url.substr(url.indexOf("?"));
     //alert(code)
     if (code) {
-      //alert(1)
       this.isloading = false;
       this.containerSeen = true;
       this.userId = sessionStorage.getItem("userId");
       this.userName = sessionStorage.getItem("userName");
       this.headUrl = sessionStorage.getItem("headUrl");
-      //alert(sessionStorage.getItem("name"))
-      // this.getCurrentPositionB();
-      // this.refreshLocation = setInterval(() => {
-      //   this.getCurrentPositionB();
-      // }, 30000);
-      // this.getClockedPlace();
-      // this.refreshInfo = setInterval(() => {
-      //   this.getClockEventMarquee();
-      // }, 20000);
-      window.clearInterval(this.refreshLocation);
-      this.initMap();
-      this.getClockedPlace();
+
+      //this.getClockedPlace();
+      this.getLoginSign();
+      // window.clearInterval(this.refreshLocation);
+      // this.initMap();
       this.refreshInfo = setInterval(() => {
         this.getClockEventMarquee();
-      }, 30000);
+      }, 3000);
     } else {
       //alert(2)
       //let code = queryURL("code");
@@ -1757,18 +1845,14 @@ export default {
         this.containerSeen = false;
       }
     }
-    // this.initMap();
-    // this.getClockedPlace();
-    // this.refreshInfo=setInterval(()=>{
-    //     this.getClockEventMarquee();
-    // },20000)
-    // getClockPlaceAll()
-    //     .then(res => {
-    //       return res.data
-    //     })
-    //     .then(data => {
-    //       console.log("data1",data)
-    //     })
+    // document.addEventListener("visibilitychange", function(){
+    //     if(document.title == document.hidden){
+          
+    //     }else{
+    //       alert(2)
+    //     }
+    // });
+    
   },
   destroyed() {
     window.clearInterval(this.refreshLocation);
@@ -1956,6 +2040,7 @@ export default {
   height: 100%;
   width: 60%;
   background: rgba(0, 0, 0, 0.6);
+  overflow-y: scroll;
 }
 .v-modal {
   // background: #fff;
@@ -2062,18 +2147,19 @@ export default {
 .popupAdver .weui-dialog {
   width: 80%;
   height: 80%;
-  top: 250px;
+  // top: 250px;
   background: none;
+  z-index: 50000;
 }
 .adver {
-  height:100%;
+  height: 100%;
   width: 100%;
   margin: 0 auto;
   background: url(../../assets/images/partybuild/adver.png) no-repeat;
   background-size: 100%;
-  padding-top: 50%;
-  padding-bottom: 5%;
-  margin-top: 20%;
+  // padding-top: 50%;
+  // padding-bottom: 5%;
+  // margin-top: 20%;
 }
 // 左下
 #popuProe .vux-popup-dialog {
@@ -2186,5 +2272,4 @@ export default {
 .end .weui-dialog {
   background: none;
 }
-
 </style>
