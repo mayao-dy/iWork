@@ -671,16 +671,16 @@ export default {
           artField: 1, //句子id
           details: " 上海申语艺术中心，位于上海市浦东新区耀江路1-10号" //详情
         },
-        {
-          place: "test",
-          isClock: false, //是否打过卡
-          longitude: 121.517618, //经度
-          latitude: 31.244405, //纬度
-          point: new BMap.Point(121.517618,31.244405),//121.442493,31.168105
-          artNo: 1, //文章id
-          artField: 1, //句子id
-          details: " test" //详情
-        }
+        // {
+        //   place: "test",
+        //   isClock: false, //是否打过卡
+        //   longitude: 121.517618, //经度
+        //   latitude: 31.244405, //纬度
+        //   point: new BMap.Point(121.517618,31.244405),//121.442493,31.168105
+        //   artNo: 1, //文章id
+        //   artField: 1, //句子id
+        //   details: " test" //详情
+        // }
       ],
       articleList: [
         {
@@ -1342,12 +1342,12 @@ export default {
       // var point12 = new BMap.Point(121.513785, 31.222829);//老码头
       // var point13 = new BMap.Point(121.506606, 31.231855);//上海外滩英迪格酒店
 
-      var myIcon = new BMap.Icon(markerImg, new BMap.Size(20, 20), {
+      var myIcon = new BMap.Icon(markerImg, new BMap.Size(40, 40), {
         // 指定定位位置。
         // 当标注显示在地图上时，其所指向的地理位置距离图标左上
         // 角各偏移10像素和25像素。您可以看到在本例中该位置即是
         // 图标中央下端的尖角位置。
-        anchor: new BMap.Size(10, 15),
+        anchor: new BMap.Size(10, 25),
         // 设置图片偏移。
         // 当您需要从一幅较大的图片中截取某部分作为标注图标时，您
         // 需要指定大图的偏移位置，此做法与css sprites技术类似。
@@ -1801,7 +1801,7 @@ export default {
     }
   },
   mounted() {
-    document.title = "党建活动";
+    document.title = "学习十九大 健步跟党走";
     //this.initMap();
     // 显示
     this.$vux.loading.show({
