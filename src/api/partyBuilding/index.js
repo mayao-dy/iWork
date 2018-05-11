@@ -21,8 +21,8 @@ export function getClockedPlace(userId) {
  * method: GET
  * url: /v1/clock/rank/{top}
  */
-export function getClockRank() {
-    return instance.get('/v1/clock/rank/20')
+export function getClockRank(userId) {
+    return instance.get('/v1/clock/rank/20/'+userId)
 }
 /* name: 用于获取当前活动事件,要获取全部时top填0。
  * method: GET
@@ -70,4 +70,18 @@ export function getLoginSign() {
     // let url="http://121.40.142.191:8585/"
     // return instance.get('/v1/login/sign?url=' + url)
     return instance.get('/v1/login/sign')
+}
+/* name: 用于获取紧急通知。
+ * method: GET
+ * url: /v1/clock/notice
+ */
+export function getClockNotice() {
+    return instance.get('/v1/clock/notice')
+}
+/* name: 用于获取当前活动参与情况。
+ * method: GET
+ * url: /v1/clock/act/info
+ */
+export function getClockActInfo() {
+    return instance.get('/v1/clock/act/info')
 }

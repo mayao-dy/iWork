@@ -13,8 +13,8 @@ Vue.use(Mint);
 
 import { ToastPlugin, AlertPlugin,ConfirmPlugin,TransferDom,Popup,LoadingPlugin } from 'vux';
 Vue.use(ToastPlugin).use(AlertPlugin).use(ConfirmPlugin).use(Popup).use(TransferDom).use(LoadingPlugin);
-import { Tab, Tabs } from 'vant';
-Vue.use(Tab).use(Tabs);
+import { Tab, Tabs,NoticeBar} from 'vant';
+Vue.use(Tab).use(Tabs).use(NoticeBar);
 Vue.use(require('vue-wechat-title'))
 /* eslint-disable no-new */
 new Vue({

@@ -28,6 +28,16 @@ export default {
 </script>
 <style lang="scss">
 @import './styles/variable.scss';
+//公告修改
+.van-notice-bar{
+  font-size: 14px;
+}
+.text-center{
+  text-align: center;
+}
+.font-18{
+  font-size:18px;
+}
 //弹框修改
 .weui-dialog__btn_primary{
   color: $color-primary !important;

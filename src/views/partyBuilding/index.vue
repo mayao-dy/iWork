@@ -1,11 +1,16 @@
 <template>
 <div class="party-container">
+  <div v-if="!isApp" class="noApp">请在手机端打开应用</div>
     <!-- <div v-if="isloading" style="padding-top: 200px;text-align: center;width: 100%;color: #999;">
       <inline-loading></inline-loading>
     </div>
     <div v-if="!isloading"> -->
       <!-- <div v-if="!containerSeen" style="padding-top: 200px;text-align: center;color: #999;width: 100%;">进入失败,请重新进入！</div> -->
       <!-- <div v-if="containerSeen"> -->
+        <!-- closeable 模式，在右侧显示关闭按钮 -->
+        <van-notice-bar :speed='30' @click="showNotice">
+          {{notice}}
+        </van-notice-bar>
           <div id="map_container"></div>
         <div class="bottom-circle"></div>
           <div class="bottom-rectangle"></div>
@@ -46,6 +51,11 @@
               <div class="persFalse" @click="persdown">
                         <img src="../../assets/images/partybuild/false.png">
               </div>
+              <div class="rank-total">
+                  <div class="my-achieve"><span class="pr-10">我的排名</span><span v-if="!myRank">暂无</span><span v-if="myRank">{{myRank}}</span></div>
+                  <div class="my-achieve"><span class="pr-10">参与人数</span><span>{{totalAttend}}</span></div>
+                  <div class="my-achieve"><span class="pr-10">打卡人次</span><span>{{totalClock}}</span></div>
+              </div>
               <div class="poRight_List">
                   <span></span>
                   <span>姓名</span>
@@ -53,16 +63,23 @@
                   <!-- <span>耗时</span> -->
                   <span>知识点</span>
               </div>
-              <div class="poRight_List" :key="index" v-for="(item, index) in rankingList">
-                  <span>
-                      <img v-if="item.rank==1" src="../../assets/images/partybuild/first.png">  
-                      <img v-if="item.rank==2" src="../../assets/images/partybuild/second.png"> 
-                      <img v-if="item.rank==3" src="../../assets/images/partybuild/third.png">  
-                  </span>
-                  <span>{{item.userName}}</span>
-                  <span>{{item.clocked}}点</span>
-                  <span>{{item.completedArt}}个</span>
+              <div class="rank-div">
+                <div class="poRight_List" :key="index" v-for="(item, index) in rankingList">
+                    <span>
+                        <img v-if="item.rank==1" src="../../assets/images/partybuild/first.png">  
+                        <img v-if="item.rank==2" src="../../assets/images/partybuild/second.png"> 
+                        <img v-if="item.rank==3" src="../../assets/images/partybuild/third.png">  
+                    </span>
+                    <span>{{item.userName}}</span>
+                    <span>{{item.clocked}}点</span>
+                    <span>{{item.completedArt}}个</span>
+                </div>
               </div>
+              <!-- <div class="rank-bottom">
+                  <div class="text-center my-achieve"><span>我的排名</span><span v-if="!myRank">暂无</span><span v-if="myRank">{{myRank}}</span></div>
+                  <div class="text-center my-achieve"><span>参与人数</span><span>{{totalAttend}}</span></div>
+                  <div class="text-center my-achieve"><span>打卡人次</span><span>{{totalClock}}</span></div>
+              </div> -->
           </mt-popup>
 
           <!-- /// -->
@@ -74,41 +91,41 @@
                       <p>一、活动规则
                       </p>
                       <p>                
-                          1、活动开始：由本所徒步队组织全体参与活动的队员于XX日早上8点30在浦江饭店正门集合统一出发，自行安排徒步路线。
+                          1、启动仪式：5月19日上午8：30在浦江饭店孔雀厅集合，简短仪式后出发。
                       </p>
                       <p>                
-                          2、活动打卡：
+                          2、行程安排：由队员自行安排徒步路线。因故没有参加启动仪式的队员，也可自行选择路线参与活动。
+                      </p>
+                      <p>                
+                          3、活动打卡：
                       </p>
                        <p>                
-                          （1）到达19个活动指定打卡点200米范围内时，点击“打卡”，地图上的五角星将变成党徽。
+                          （1）到达19个活动指定打卡点400米范围内时，点击“打卡”，地图上的五角星将被点亮。
                       </p>
                        <p>                
-                          （2）打卡完成后，系统将随机推送并点亮一个党建知识点里的一颗星，打卡越多点亮的星越多。
+                          （2）打卡完成后，系统将随机推送并点亮一个党建知识点里的一颗星。
                       </p>
                        <p>                
-                          （3）前18个打卡点，一个点对应一颗星，最后一个打卡点打卡成功后，所有知识点全部点亮。
+                          （3）系统中设置了1个幸运打卡点，在幸运打卡点打卡后将直接点亮一个完整的党建知识点。
                       </p>
-                       <p>二、活动奖励
+                       <p>                
+                          （4）最后一个打卡点打卡成功后，所有知识点将全部点亮。
                       </p>
-                      <p>                
-                          1、一等奖：8个党建知识点全部点亮，且2日累计步数超过6万步。
-                      </p>
-                      <p>                
-                          2、二等奖：5个党建知识点点亮，且2日累计步数超过4万步。
+                       <p>二、奖励评选
                       </p>
                       <p>                
-                          3、三等奖：3个党建知识点点亮，且2日累计步数超过2万步。
+                          奖项将根据集齐的党建知识点数量评定，集齐2个党建知识点后，可入围获奖名单。活动分设三个奖项，其中一等奖占比不超过20%；二等奖占比不超过30%；三等奖占比不超过50%。
                       </p>
-                      <p> 三、注意事项
-                      </p>
-                      <p>                
-                          1、有1个党建知识点被隐藏，因此活动平台上只能看到7个知识点。
+                      <p> 三、活动说明
                       </p>
                       <p>                
-                          2、由于徒步距离较长，参加人员应自备行装、舒鞋轻囊，并根据自身的身体状况选择距离。
+                          1、活动总共设有8个党建知识点，其中1个党建知识点处于隐藏状态。当最后一个打卡点打卡成功后，系统将点亮最后一个党建知识点。
                       </p>
                       <p>                
-                         3、请自行选择计步软件，保存步数截图，以备领奖时核验。
+                          2、同一打卡点只能打卡1次，反复打卡无效。
+                      </p>
+                      <p>                
+                         3、由于徒步距离较长，参加人员应自备行装、舒鞋轻囊，并根据自身的身体状况合理安排行程，选择适宜距离。
                       </p>
                       <p>                
                          4、徒步路线途径地点会有车辆来往且某些路段狭窄，请自行注意安全。
@@ -129,9 +146,12 @@
                         {{userName}}
                     </div>
                     <div class="persHead">
-                        <img :src="headUrl">  
-                        <!-- <img src="../../assets/images/partybuild/portrait.png">   -->
+                        <img v-if="headUrl!=''" :src="headUrl">  
+                        <img v-if="headUrl==''" src="../../assets/images/partybuild/defHeader.png">  
                     </div>
+                    <!-- <div class="text-center font-18">我的成绩</div> -->
+                    <!-- <div class="text-center my-achieve"><span>我的排名</span><span>打卡</span><span>知识点</span></div>
+                    <div class="text-center my-achieve"><span v-if="!myRank">暂无</span><span v-if="myRank">{{myRank}}</span><span>{{myClocked}}点</span><span>{{myArticle}}个</span></div> -->
                     <div class="persKn_jg">
                           <div class="persKn" v-for="(article,index) in articleList" :key="index" v-show="index!=party-1">
                               <div class="perPofix" v-show="article.getNum==article.totalNum"> </div>
@@ -172,6 +192,35 @@
               </x-dialog>
           </div>
           <!-- 打卡成功弹框结束 -->
+          <!-- 幸运点打卡成功弹框 -->
+          <div v-transfer-dom>
+              <x-dialog v-model="isGetWordsLucky" :hide-on-blur="true">
+                  <div class="getwords-lucky-dialog">
+                      <!-- <img src="../../assets/images/partybuild/getWords.png"> -->
+                      <div class="getwords-div">
+                        <div class="golden-article-lucky-div">
+                          <div>恭喜你！到达幸运点</div>
+                          <div>{{select_place}}打卡成功！</div>
+                          <div>获得知识点</div>
+                          <div class="golden-article-lucky">{{select_article}}</div>
+                          <div class="golden-words-long-lucky">
+                            <div  v-if="!select_long" v-for="item in select_words_lucky" style="text-align:center">
+                              {{item.words}}
+                            </div>
+                            <div v-if="select_long">
+                              价值口号：至诚至公 全球融通 建世界领先交易所
+                              <br>
+                              使命愿景：汇聚资本力量，服务实体经济，服务投资大众，服务发展大局；有效维护市场公开公平公正，有效配置国内国际资源，有效防范市场风险；建设成为安全高效，功能完备，与我国社会主义现代化强国相匹配的世界领先交易所。
+                              <br>
+                              核心价值观：高效、透明、稳健、服务、进取、奉献
+                            </div>  
+                          </div>
+                        </div>
+                      </div>
+                  </div>
+              </x-dialog>
+          </div>
+          <!-- 幸运点打卡成功弹框结束 -->
           <!-- 未打卡弹框 -->
           <div v-transfer-dom>
               <x-dialog v-model="isShowIntro" :hide-on-blur="true">
@@ -188,6 +237,15 @@
               <x-dialog v-model="isInfo" :hide-on-blur="true">
                   <div class="location-intro">
                       <div :key="index" v-for="(item, index) in eventList">{{item.eventTime}}<br>{{item.userName}}{{item.event}}！</div>
+                  </div>
+              </x-dialog>
+          </div>
+          <!-- 推送消息弹框结束 -->
+           <!-- 推送消息弹框 -->
+          <div v-transfer-dom>
+              <x-dialog v-model="isNotice" :hide-on-blur="true">
+                  <div class="location-intro">
+                      {{notice}}
                   </div>
               </x-dialog>
           </div>
@@ -253,7 +311,9 @@ import {
   postClockPlace,
   postClockPlaceTest,
   handleLogin,
-  getLoginSign
+  getLoginSign,
+  getClockNotice,
+  getClockActInfo
 } from "../../api/partyBuilding/index";
 import { setTimeout } from "timers";
 // import { setInterval } from "timers";
@@ -266,66 +326,40 @@ var mapG, geolocationG, bd_lng, bd_lat;
 // mapG = new AMap.Map("container", {
 //   resizeEnable: true
 // });
+
+var wxqyh_iswechatapp = null;//是否微信手机客户端打开
+
+// 指定排序的比较函数
+function compare(property){
+    return function(obj1,obj2){
+        var value1 = obj1[property];
+        var value2 = obj2[property];
+        return value1 - value2;     // 升序
+    }
+}
+   
+
+/**
+ * 判断是否微信打开
+ * @returns {Boolean}
+ */
+function isWeChatApp(){
+  if(wxqyh_iswechatapp == null){
+      var ua = navigator.userAgent.toLowerCase();
+        if((ua.match(/MicroMessenger/i)=="micromessenger") && ua.indexOf("windowswechat")==-1) {
+          wxqyh_iswechatapp = true;
+        }
+        else{
+          wxqyh_iswechatapp = false;
+        }
+  }
+    return wxqyh_iswechatapp;
+}
+
+var isApp=isWeChatApp();
+
+
 var CryptoJS = require("crypto-js");
-
-// // Encrypt
-// var ciphertext = CryptoJS.AES.encrypt('my message', 'secret key 123');
-
-// // Decrypt
-// var bytes  = CryptoJS.AES.decrypt(ciphertext.toString(), 'secret key 123');
-// var plaintext = bytes.toString(CryptoJS.enc.Utf8);
-
-// console.log("--------------------",plaintext);
-
-// const crypto = require('crypto');
-
-// function aesEncrypt(data, key) {
-//     const cipher = crypto.createCipher('aes192', key);
-//     var crypted = cipher.update(data, 'utf8', 'hex');
-//     crypted += cipher.final('hex');
-//     return crypted;
-// }
-
-// function aesDecrypt(encrypted, key) {
-//     const decipher = crypto.createDecipher('aes192', key);
-//     var decrypted = decipher.update(encrypted, 'hex', 'utf8');
-//     decrypted += decipher.final('utf8');
-//     return decrypted;
-// }
-
-// var data = 'test';
-// var key = 'yaoma';
-// var encrypted = aesEncrypt(data, key);
-// var decrypted = aesDecrypt(encrypted, key);
-
-// console.log('Plain text: ' + data);
-// console.log('Encrypted text: ' + encrypted);
-// console.log('Decrypted text: ' + decrypted);
-
-// function encrypt (message, key) {
-//     var keyHex = CryptoJS.enc.Utf8.parse(key);
-//      var encrypted = CryptoJS.AES.encrypt(message, keyHex, {
-//         mode: CryptoJS.mode.ECB,
-//         padding: CryptoJS.pad.Pkcs7
-//     });
-//     return {
-//         key: keyHex,
-//         value: encrypted.toString()
-//     }
-// }
-
-// function decrypt (message, key) {
-//     var plaintext = CryptoJS.AES.decrypt(message, key, {
-//         mode: CryptoJS.mode.ECB,
-//         padding: CryptoJS.pad.Pkcs7
-//     })
-//     return plaintext.toString(CryptoJS.enc.Utf8)
-// }
-
-// var a = encrypt('test', 'yaoma');
-// var b = decrypt(a.value, a.key);
-
-// console.log("_______________",a.value)
 
 // 定义加/解密的 key(key都放这里了, 加密还有啥意义!^_^)
 const initKey = "yaoma";
@@ -424,6 +458,15 @@ export default {
   },
   data() {
     return {
+      isNotice:false,
+      notice:"徒步路线途径地点会有车辆来往且某些路段狭窄，请自行注意安全。",
+      myRank:0,
+      totalAttend:0,
+      totalClock:0,
+      myClocked:0,
+      myArticle:0,
+      isGetWordsLucky:false,//是否幸运点
+      isApp:isApp,
       appId: "", // 必填，随行办公的cropID
       timestamp: "", // 必填，生成签名的时间戳
       nonceStr: "", // 必填，生成签名的随机串
@@ -440,6 +483,7 @@ export default {
       map: new BMap.Map("map_container"),
       refreshLocation: "",
       refreshInfo: "",
+      refreshInfo2: "",
       isInfo: false,
       isShowIntro: false,
       isGetWords: false,
@@ -456,6 +500,7 @@ export default {
       select_place: "",
       select_details: "",
       select_words: "",
+      select_words_lucky:[],
       select_article: "",
       select_long: false, //是否长句
       isAbleClock: false, //是否可打卡
@@ -467,208 +512,246 @@ export default {
       locationInfo: [
         {
           place: "上海东方体育中心",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.48398, //经度
           latitude: 31.161852, //纬度
           point: new BMap.Point(121.48398, 31.161852),
           artNo: 1, //文章id
           artField: 101, //句子id
+          artLucky:[],//幸运点句子
           details:
             "上海东方体育中心，别名“海上皇冠”，原名上海水上竞技中心，位于上海浦东新区，以水上项目为主的综合性体育场馆。共包括一座1.5万人的主体育馆，5千人的游泳馆和5千人的室外跳水池，总投资约20亿元人民币，于2010年底竣工，该场馆将主要为2011年上海世界游泳锦标赛服务。" //详情
         },
         {
           place: "余德耀美术馆",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.46834, //经度
           latitude: 31.176691, //纬度
           point: new BMap.Point(121.46834, 31.176691),
           artNo: 1, //文章id
           artField: 102, //句子id
+          artLucky:[],//幸运点句子
           details:
             "余德耀美术馆坐落于“西岸文化走廊”，东临滨江的龙腾大道，北依丰谷路，由原龙华机场的大机库改建而成。总面积9000多平米的建筑中，老机库改建的主展厅就占了3000多平米，其特有的 巨大空间与张扬的结构感，与余先生以装置为主的藏品相得益彰。" //详情
         },
         {
           place: "光启龙华港湾",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.468264, //经度
           latitude: 31.183048, //纬度
           point: new BMap.Point(121.468264, 31.183048),
           artNo: 1, //文章id
           artField: 103, //句子id
+          artLucky:[],//幸运点句子
           details:
             " 为了配合世博会在浦西这边新建的“滨江大道” ，夜晚的光启龙华港湾一定要看看，远可遥望浦东灯火，近可叹彩虹桥之风采。被称为“龙之脊”的龙华港桥两侧种植了许多桃花，春天可以来这里看桃花" //详情
         },
         {
           place: "龙美术馆西岸馆",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.471366, //经度
           latitude: 31.190301, //纬度
           point: new BMap.Point(121.471366, 31.190301),
           artNo: 1, //文章id
           artField: 104, //句子id
+          artLucky:[],//幸运点句子
           details:
             " 4月中旬前到龙美术馆，额外附送免费樱花景观哟，位于西岸核心位置的龙美术馆西岸馆，是不可错过的标志性建筑，龙美散发着刚柔并济，蕴旧预新的博大之美。西岸馆常规展出一些现当代的艺术品，同期还会推出特别展览；展馆设计非常有现代感，工业感，馆内空间大，常常有大型艺术品展出。" //详情
         },
         {
           place: "上海绿地万豪酒店",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.479334, //经度
           latitude: 31.197958, //纬度
           point: new BMap.Point(121.479334, 31.197958),
           artNo: 2, //文章id
           artField: 201, //句子id
+          artLucky:[],//幸运点句子
           details:
             "上海绿地万豪酒店坐落于黄浦江边，为卢湾区新建的CBD中心地段，结合滨江公园、大型商场及办公大楼，是商务和休闲的理想场所。酒店邻近浦西世博园区及打浦路隧道，交通便利且闹中取静,可欣赏美丽的黄浦江日景和夜晚的浦东灯火，上海的独特景色在此尽收眼底。" //详情
         },
         {
           place: "上海世博园",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.490812, //经度
           latitude: 31.192333, //纬度
           point: new BMap.Point(121.490812, 31.192333),
           artNo: 2, //文章id
           artField: 202, //句子id
+          artLucky:[],//幸运点句子
           details:
-            "  2010年上海世博会场地位于南浦大桥和卢浦大桥之间，沿着上海城区黄浦江两岸进行布局，随着2010年上海世博会的落幕，世博园保留了标志性的“一轴四馆”，  漫步世博园，可以看到奔流不息的黄浦江以及江对面的绿地广场。还可以拍到中华艺术宫，南浦大桥和卢浦大桥。" //详情
+            "2010年上海世博会场地位于南浦大桥和卢浦大桥之间，沿着上海城区黄浦江两岸进行布局，随着2010年上海世博会的落幕，世博园保留了标志性的“一轴四馆”，  漫步世博园，可以看到奔流不息的黄浦江以及江对面的绿地广场。还可以拍到中华艺术宫，南浦大桥和卢浦大桥。" //详情
         },
         {
           place: "梅赛德斯奔驰文化中心",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.499852, //经度
           latitude: 31.194375, //纬度
           point: new BMap.Point(121.499852, 31.194375),
           artNo: 2, //文章id
           artField: 203, //句子id
+          artLucky:[],//幸运点句子
           details:
             "滨江而筑的梅赛德斯-奔驰文化中心以其穿梭腾飞的姿态傲立于2010年上海世博会园区的核心区域，毗邻世博轴与中国馆。整座建筑以其轻盈灵动，宛若飞碟般的独特造型横空出世，犹如一枚“艺海贝壳”，美艳耀世。中心拥有一个18,000座的主场馆，以及音乐俱乐部、电影院、溜冰场、餐厅、零售区域。" //详情
         },
         {
           place: "上海企业联合馆",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.49473, //经度
           latitude: 31.201389, //纬度
           point: new BMap.Point(121.49473, 31.201389),
           artNo: 2, //文章id
           artField: 204, //句子id
+          artLucky:[],//幸运点句子
           details:
             "上海企业联合馆（Shanghai Corporate Pavilion）昵称“魔方”，是由上海市国资委下属的近40家大中型国有企业联合出资建造，一个具有智能技术、梦幻意境和互动体验的生态环保建筑。其建筑风格、设计理念、环保应用、布展方式、娱乐体验和市民的参与都将魔幻地展现上海的未来。" //详情
         },
         {
           place: "上海儿童艺术剧场",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.500567, //经度
           latitude: 31.202282, //纬度
           point: new BMap.Point(121.500567, 31.202282),
           artNo: 3, //文章id
           artField: 301, //句子id
+          artLucky:[],//幸运点句子
           details:
             "上海儿童艺术剧场是全国最大的儿童剧场，原为上海世博会上汽集团-通用汽车馆，改建后于2013年6月1日正式启用。剧场位于西藏南路苗江路口黄浦江畔，占地面积10528平方米，建筑面积15668平方米。剧场致力于营造理念先进、特色鲜明的儿童性、公益性、标志性、国际性视觉艺术体验中心。" //详情
         },
         {
           place: "云餐厅（世博店）",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.505454, //经度
           latitude: 31.206506, //纬度
           point: new BMap.Point(121.505454, 31.206506),
           artNo: 3, //文章id
           artField: 302, //句子id
+          artLucky:[],//幸运点句子
           details:
             "以玻璃房为主装修基调的云餐厅，位于原世博城市未来馆，这幢历经风雨的建筑原是老上海的发电厂，见证了上海半个多世纪的历史变迁。偶尔的某个周末，还能听到用餐的老人向晚辈讲诉自己的记忆。立于云餐厅面向浦江的露台之上，这里曾是俯瞰世博全景的绝佳去处。" //详情
         },
         {
           place: "上海世博洲际酒店",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.511759, //经度
           latitude: 31.205054, //纬度
           point: new BMap.Point(121.511759, 31.205054),
           artNo: 1, //文章id
           artField: 1, //句子id
+          artLucky:[],//幸运点句子
           details:
             "上海世博洲际酒店坐落于黄浦江畔，毗邻南浦大桥，值得一提的是，伫立于花园之中的9栋独立的上世纪30年代的历史别墅建筑，其前身是中国酒精厂，后改建成为上海溶剂厂。它们似乎在诉说着昔日上海的繁华与传奇，徜徉其中，仿佛穿越了时空感受着上海的过去与现在。" //详情
         },
         {
           place: "老码头",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.513785, //经度
           latitude: 31.222829, //纬度
           point: new BMap.Point(121.513785, 31.222829),
           artNo: 1, //文章id
           artField: 1, //句子id
+          artLucky:[],//幸运点句子
           details:
             " “老码头”是原来的十六铺，有着最上海的传奇。这里的临江弄堂、老式石库门群落流传着上海滩大亨们的故事。闲坐屋顶的欧式露台，看黄浦江江水滔滔，楼下曾是黄金荣、杜月笙的仓库。如今，老码头将更好地融合上海这座城市的艺术、文化 、商业与风尚，呈现给世人别具一格的海派风情。" //详情
         },
         {
           place: "上海外滩英迪格酒店",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.506606, //经度
           latitude: 31.231855, //纬度
           point: new BMap.Point(121.506606, 31.231855),
           artNo: 1, //文章id
           artField: 1, //句子id
+          artLucky:[],//幸运点句子
           details:
             " 英迪格酒店，位于外滩南端的十六铺码头，坐拥浦江两岸传统与现代幷蓄的秀丽风光，兼收并蓄，完美融合了真实现代的设计特点与传统的中国元素，在创造灵动有趣的环境同时，又巧妙地将与众不同的现代本土化家居装饰带入设计之中。" //详情
         },
         {
           place: "浦江饭店",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.497609, //经度
           latitude: 31.250104, //纬度
           point: new BMap.Point(121.497609, 31.250104),
           artNo: 1, //文章id
           artField: 1, //句子id
+          artLucky:[],//幸运点句子
           details:
             " 浦江饭店，是中国第一家西商饭店，坐落于上海著名地标外白渡桥东侧，1990年12月19日，上海证券交易所在浦江饭店内开业。" //详情
         },
         {
           place: "凯石大厦",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.498394, //经度
           latitude: 31.23843, //纬度
           point: new BMap.Point(121.498394, 31.23843),
           artNo: 1, //文章id
           artField: 1, //句子id
+          artLucky:[],//幸运点句子
           details:
             " 凯石大厦，凯石大厦位于上海黄浦区外滩的中山东一路、中山东二路的分界点。大厦的门牌号（延安东路1号）在延安东路上，因位于中山东二路、延安东路转角处，事实上是中山东二路北端第一幢建筑。" //详情
         },
         {
           place: "陆家浜路渡口",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.510859, //经度
           latitude: 31.213256, //纬度
           point: new BMap.Point(121.510859, 31.213256),
           artNo: 1, //文章id
           artField: 1, //句子id
+          artLucky:[],//幸运点句子
           details: " 陆家浜路渡口，位于上海市黄浦区外马路1279号" //详情
         },
         {
           place: "后滩公园一号门",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.480273, //经度
           latitude: 31.189662, //纬度
           point: new BMap.Point(121.480273, 31.189662),
           artNo: 1, //文章id
           artField: 1, //句子id
+          artLucky:[],//幸运点句子
           details:
             " 后滩公园，上海世博后滩湿地公园为上海世博园的核心绿地景观之一，位于黄浦江之东岸之与浦明路之间，南临园区新建浦明路，西至倪家浜，北望卢浦大桥，占地18公顷。" //详情
         },
         {
           place: "环球都会广场",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.479857, //经度
           latitude: 31.175448, //纬度
           point: new BMap.Point(121.479857, 31.175448),
           artNo: 1, //文章id
           artField: 1, //句子id
+          artLucky:[],//幸运点句子
           details: " 环球都会广场,位于上海市浦东新区耀元路58号" //详情
         },
         {
           place: "上海申语艺术中心",
+          isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
           longitude: 121.479047, //经度
           latitude: 31.168813, //纬度
           point: new BMap.Point(121.479047, 31.168813),
           artNo: 1, //文章id
           artField: 1, //句子id
+          artLucky:[],//幸运点句子
           details: " 上海申语艺术中心，位于上海市浦东新区耀江路1-10号" //详情
         },
         // {
@@ -741,7 +824,7 @@ export default {
         },
         {
           articleID: 3,
-          article: "'五位一体'总体布局",
+          article: '"五位一体"总体布局',
           totalNum: 5,
           getNum: 0,
           wordsList: [
@@ -774,7 +857,7 @@ export default {
         },
         {
           articleID: 4,
-          article: "'四个全面'战略布局",
+          article:'"四个全面"战略布局',
           totalNum: 4,
           getNum: 0,
           wordsList: [
@@ -955,7 +1038,7 @@ export default {
           that.pointBD = that.bd_encrypt(longitude, latitude);
           bd_lng = that.pointBD.bd_lon;
           bd_lat = that.pointBD.bd_lat;
-          // alert("经度b：" + bd_lng);
+          //alert("经度b：" + bd_lng);
           // alert("纬度b：" + bd_lat);
           let wxPoint = new BMap.Point(bd_lng, bd_lat);
           var mk = new BMap.Marker(wxPoint);
@@ -968,7 +1051,7 @@ export default {
           that.$vux.loading.hide();
         },
         fail: function(res) {
-          //alert("failed")
+          alert("请打开手机定位功能")
         }
       });
       // let wxPoint = new BMap.Point(121.505454, 31.206506);
@@ -1342,23 +1425,24 @@ export default {
       // var point12 = new BMap.Point(121.513785, 31.222829);//老码头
       // var point13 = new BMap.Point(121.506606, 31.231855);//上海外滩英迪格酒店
 
-      var myIcon = new BMap.Icon(markerImg, new BMap.Size(40, 40), {
+      var myIcon = new BMap.Icon(markerImg, new BMap.Size(30, 30), {
         // 指定定位位置。
         // 当标注显示在地图上时，其所指向的地理位置距离图标左上
         // 角各偏移10像素和25像素。您可以看到在本例中该位置即是
         // 图标中央下端的尖角位置。
-        anchor: new BMap.Size(10, 25),
+        anchor: new BMap.Size(10, 20),
         // 设置图片偏移。
         // 当您需要从一幅较大的图片中截取某部分作为标注图标时，您
         // 需要指定大图的偏移位置，此做法与css sprites技术类似。
         imageOffset: new BMap.Size(0, 0) // 设置图片偏移
       });
-      var myRedIcon = new BMap.Icon(markerRedImg, new BMap.Size(40, 40), {
+      var myRedIcon = new BMap.Icon(markerRedImg, new BMap.Size(30, 30), {
         anchor: new BMap.Size(10, 25),
         imageOffset: new BMap.Size(0, 0) // 设置图片偏移
       });
 
       let mark = 0; //用于表示是否有点可打卡
+      let lasted_placeList=[];
       // 创建标注对象并添加到地图
       for (let i = 0; i < this.locationInfo.length; i++) {
         //map.removeOverlay(this.pointList[i]);
@@ -1380,32 +1464,77 @@ export default {
           });
           //添加打卡点点击事件
           this.pointList[i].addEventListener("click", function() {
-            that.select_place = that.locationInfo[i].place;
-            that.select_words = that.locationInfo[i].artNo;
-            that.select_article = that.locationInfo[i].artField;
-            that.select_long = that.locationInfo[i].select_long;
-            that.showAchievement(that.locationInfo[i].point, map);
+            if(that.locationInfo[i].isLucky){
+               that.select_place = that.locationInfo[i].place;
+                that.select_words_lucky = that.locationInfo[i].artLucky;
+                that.select_article = that.locationInfo[i].artField;
+                that.select_long = that.locationInfo[i].select_long;
+                that.isGetWordsLucky=true;
+            }else{
+              that.select_place = that.locationInfo[i].place;
+              that.select_words = that.locationInfo[i].artNo;
+              that.select_article = that.locationInfo[i].artField;
+              that.select_long = that.locationInfo[i].select_long;
+              that.showAchievement(that.locationInfo[i].point, map);
+            }
+           
           });
         }
         map.addOverlay(this.pointList[i]);
         //判断点是否在打卡范围
-        var circle = new BMap.Circle(this.current_point, 200, {
+        var circle = new BMap.Circle(this.current_point, 400, {
           fillColor: "",
           strokeWeight: 0,
           fillOpacity: 0,
           strokeOpacity: 0
         });
-        // console.log("this.current_point", this.current_point);
-        // console.log("this.pointList[i].point", this.pointList[i].point);
+        // if (BMapLib.GeoUtils.isPointInCircle(this.pointList[i].point, circle)) {
+        //   mark++;
+        //   this.lasted_place = this.locationInfo[i].place;
+        //   console.log("在圆形区域内");
+        // } else {
+        //   //console.log("不在圆形区域内");
+        // }
         if (BMapLib.GeoUtils.isPointInCircle(this.pointList[i].point, circle)) {
           mark++;
-          //console.log("近的点", this.locationInfo[i].place);
-          this.lasted_place = this.locationInfo[i].place;
+           
+          //if(this.locationInfo[i].isClock==false){
+           
+            this.locationInfo[i].distance= map.getDistance(this.current_point, this.locationInfo[i].point)
+            lasted_placeList.push(this.locationInfo[i]);
+          //}
+          //this.lasted_place = this.locationInfo[i].place;
           console.log("在圆形区域内");
         } else {
-          //console.log("不在圆形区域内");
         }
       }
+      //对距离进行排序
+      let sortList=[];
+      if(lasted_placeList.length){
+        sortList = lasted_placeList.sort(compare("distance"));
+        if(lasted_placeList.length){
+          sortList = lasted_placeList.sort(compare("distance"));
+          if(lasted_placeList.length==1){
+            this.lasted_place = sortList[0].place;
+          }else if(lasted_placeList.length==2){
+            if(sortList[0].isClock==false){
+              this.lasted_place = sortList[0].place;
+            }else if(sortList[1].isClock==false){
+              this.lasted_place = sortList[1].place;
+            }
+          }else{
+            if(sortList[0].isClock==false){
+              this.lasted_place = sortList[0].place;
+            }else if(sortList[1].isClock==false){
+              this.lasted_place = sortList[1].place;
+            }else if(sortList[2].isClock==false){
+              this.lasted_place = sortList[2].place;
+            }
+          }
+        }
+        
+      }
+      
       if (mark > 0) {
         this.isAbleClock = true;
       } else {
@@ -1461,12 +1590,13 @@ export default {
       // marker12.addEventListener("click",this.showAchievement );
       // marker13.addEventListener("click",this.showAchievement );
     },
-    getIsClocked() {
+    getIsClocked(map) {
       let mark = 0; //用于表示是否有点可打卡
+      let lasted_placeList=[];//所有在范围内的点
       // 创建标注对象并添加到地图
       for (let i = 0; i < this.pointList.length; i++) {
         //判断点是否在打卡范围
-        var circle = new BMap.Circle(this.current_point, 200, {
+        var circle = new BMap.Circle(this.current_point, 400, {
           fillColor: "",
           strokeWeight: 0,
           fillOpacity: 0,
@@ -1474,15 +1604,45 @@ export default {
         });
         // console.log("this.current_point", this.current_point);
         // console.log("this.pointList[i].point", this.pointList[i].point);
+        
         if (BMapLib.GeoUtils.isPointInCircle(this.pointList[i].point, circle)) {
           mark++;
-          //console.log("近的点", this.locationInfo[i].place);
-          this.lasted_place = this.locationInfo[i].place;
+          //if(this.locationInfo[i].isClock==false){
+            this.locationInfo[i].distance= map.getDistance(this.current_point, this.locationInfo[i].point)
+            lasted_placeList.push(this.locationInfo[i]);
+          //}
+          //this.lasted_place = this.locationInfo[i].place;
           console.log("在圆形区域内");
         } else {
-          //console.log("不在圆形区域内");
+        }
+       
+        
+      }
+      //对距离进行排序
+      let sortList=[];
+      if(lasted_placeList.length){
+        sortList = lasted_placeList.sort(compare("distance"));
+        if(lasted_placeList.length==1){
+          this.lasted_place = sortList[0].place;
+        }else if(lasted_placeList.length==2){
+          if(sortList[0].isClock==false){
+            this.lasted_place = sortList[0].place;
+          }else if(sortList[1].isClock==false){
+            this.lasted_place = sortList[1].place;
+          }
+        }else{
+          if(sortList[0].isClock==false){
+            this.lasted_place = sortList[0].place;
+          }else if(sortList[1].isClock==false){
+            this.lasted_place = sortList[1].place;
+          }else if(sortList[2].isClock==false){
+            this.lasted_place = sortList[2].place;
+          }
         }
       }
+      
+      //alert(this.lasted_place)
+
       if (mark > 0) {
         this.isAbleClock = true;
       } else {
@@ -1503,19 +1663,32 @@ export default {
     //右上角点击事件
     getClockRank() {
       //this.popuPright = true;
-      getClockRank()
+      getClockRank(this.userId)
         .then(res => {
           return res.data;
         })
         .then(data => {
           //this.rankingList = data.resultData;
-          if (data.resultData.length != 0) {
-            this.rankingList = data.resultData;
+          if(data.resultData.me){
+               this.myRank=data.resultData.me.rank;
+               this.myClocked=data.resultData.me.clocked;
+               this.myArticle=data.resultData.me.completedArt;
+          }
+          if (data.resultData.ranks.length != 0) {
+            this.rankingList = data.resultData.ranks;
             this.popuPright = true;
           } else {
             // 显示文字
             this.$vux.toast.text("暂无数据", "middle");
           }
+        });
+      getClockActInfo()
+        .then(res => {
+          return res.data;
+        })
+        .then(data => {
+          this.totalAttend=data.resultData.totalMembers;
+          this.totalClock=data.resultData.clockedTime;
         });
     },
     getRules() {
@@ -1537,10 +1710,18 @@ export default {
               x.getNum = 0;
             });
             clockedList.forEach(x => {
-              this.articleList[x.artNo - 1].wordsList[
-                x.artContentNo - 1
-              ].isGet = true;
-              this.articleList[x.artNo - 1].getNum++;
+              if(x.isLuckyPoint==0){
+                this.articleList[x.artNo - 1].wordsList[
+                  x.artContentNo - 1
+                ].isGet = true;
+                this.articleList[x.artNo - 1].getNum++;
+              }else{
+                this.articleList[x.artNo - 1].getNum=this.articleList[x.artNo - 1].totalNum;
+                this.articleList[x.artNo - 1].wordsList.forEach(y => {
+                  y.isGet = true;
+                });
+              }
+              
             });
           } else {
             //若大满贯则点亮所有句子
@@ -1554,6 +1735,17 @@ export default {
           }
           
         });
+        // getClockRank(this.userId)
+        // .then(res => {
+        //   return res.data;
+        // })
+        // .then(data => {
+        //     if(data.resultData.me){
+        //        this.myRank=data.resultData.me.rank;
+        //        this.myClocked=data.resultData.me.clocked;
+        //        this.myArticle=data.resultData.me.completedArt;
+        //     }
+        // });
     },
     getClockEvent(top) {
       getClockEvent(top)
@@ -1593,20 +1785,31 @@ export default {
             this.locationInfo.map(y => {
               if (x.place == y.place) {
                 y.isClock = true;
-                y.artField = this.articleList[x.artNo - 1].article;
-                y.artNo = this.articleList[x.artNo - 1].wordsList[
-                  x.artContentNo - 1
-                ].words;
-                if (x.artNo == 7 && x.artContentNo == 2) {
-                  y.select_long = true;
-                } else {
-                  y.select_long = false;
+                if(x.isLuckyPoint){
+                    y.isLucky=true;
+                    y.artField = this.articleList[x.artNo - 1].article;
+                    y.artLucky = this.articleList[x.artNo - 1].wordsList;
+                    if (x.artNo == 7) {
+                      y.select_long = true;
+                    } else {
+                      y.select_long = false;
+                    }
+                }else{
+                    y.artField = this.articleList[x.artNo - 1].article;
+                    y.artNo = this.articleList[x.artNo - 1].wordsList[
+                      x.artContentNo - 1
+                    ].words;
+                    if (x.artNo == 7 && x.artContentNo == 2) {
+                      y.select_long = true;
+                    } else {
+                      y.select_long = false;
+                    }
                 }
+                
               }
             });
           });
 
-          console.log("this.locationInfo", this.locationInfo);
           window.clearInterval(this.refreshLocation);
           this.initMap();
         });
@@ -1632,7 +1835,7 @@ export default {
         var str0 = "0000000000000000";
         key = (key + str0).substring(0, 16);
       }
-      console.log(key)
+      console.log("key",key)
       key = CryptoJS.enc.Utf8.parse(fillKey(key));
       // 定义需要加密的数据
       const data = content;
@@ -1646,23 +1849,33 @@ export default {
         })
         .then(data => {
           if (data.errCode == 0) {
-            this.select_place = data.resultData.place;
-            this.select_words = this.articleList[
-              data.resultData.artNo - 1
-            ].wordsList[data.resultData.artContentNo - 1].words;
-            this.select_article = this.articleList[
-              data.resultData.artNo - 1
-            ].article;
-            if (
-              data.resultData.artNo == 7 &&
-              data.resultData.artContentNo == 2
-            ) {
-              this.select_long = true;
-            } else {
-              this.select_long = false;
-            }
-            if (data.resultData.isAllAct == 0) {
-              this.showAchievement();
+            if (data.resultData.isAllAct == 0) {//判断是否大满贯
+              this.select_place = data.resultData.place;
+              if(data.resultData.isLuckyPoint ==0){//判断是否幸运点
+                  this.select_words = this.articleList[data.resultData.artNo - 1].wordsList[data.resultData.artContentNo - 1].words;
+                  this.select_article = this.articleList[data.resultData.artNo - 1].article;
+                  if (
+                    data.resultData.artNo == 7 &&
+                    data.resultData.artContentNo == 2
+                  ) {//判断是否长句
+                    this.select_long = true;
+                  } else {
+                    this.select_long = false;
+                  }
+                  this.isGetWords = true;
+              }else{
+                  this.isLucky=true;
+                  this.select_article = this.articleList[data.resultData.artNo - 1].article;
+                  this.select_words_lucky=this.articleList[data.resultData.artNo - 1].wordsList
+                  if (
+                    data.resultData.artNo == 7
+                  ) {//判断是否长句
+                    this.select_long = true;
+                  } else {
+                    this.select_long = false;
+                  }
+                  this.isGetWordsLucky = true;
+              } 
             } else {
               this.isShowEnd = true;
             }
@@ -1752,9 +1965,13 @@ export default {
 
               //this.initMap();
               // this.getClockedPlace();
-              // this.refreshInfo = setInterval(() => {
-              //   this.getClockEventMarquee();
-              // }, 20000);
+              this.refreshInfo = setInterval(() => {
+                this.getClockEventMarquee();
+              }, 5000);
+              this.getClockNotice();
+              this.refreshInfo2 = setInterval(() => {
+                this.getClockNotice();
+              }, 30000);
             } else {
               this.containerSeen = false;
               //alert(this.containerSeen);
@@ -1769,6 +1986,7 @@ export default {
     },
     getLoginSign() {
       let that = this;
+      //that.getClockedPlace();
       getLoginSign()
         .then(res => {
           return res.data;
@@ -1793,6 +2011,21 @@ export default {
           });
         });
     },
+    getClockNotice(){
+      //临时通知
+        getClockNotice()
+        .then(res => {
+          return res.data;
+        })
+        .then(data => {
+          if (data.resultData) {
+            this.notice = data.resultData;
+          }
+        });
+    },
+    showNotice(){
+      this.isNotice=true;
+    },
     GetQueryString(url, name, search) {
       var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
       var r = search.substr(1).match(reg);
@@ -1802,12 +2035,20 @@ export default {
   },
   mounted() {
     document.title = "学习十九大 健步跟党走";
-    //this.initMap();
+    // document.querySelector('body').addEventListener('touchmove', function(e) {
+    //     e.preventDefault();
+    // })
+    // document.querySelector('body').addEventListener('touchmove', function(e) {
+    //     if (!document.querySelector('.party-container').contains(e.target)) {
+    //         e.preventDefault();
+    //     }
+    // })
     // 显示
     this.$vux.loading.show({
       text: "加载中"
     });
 
+    //this. getClockedPlace();
     setTimeout(() => {
       this.popupAdver = false;
     }, 3000);
@@ -1831,7 +2072,11 @@ export default {
       // this.initMap();
       this.refreshInfo = setInterval(() => {
         this.getClockEventMarquee();
-      }, 3000);
+      }, 5000);
+      this.getClockNotice();
+      this.refreshInfo2 = setInterval(() => {
+        this.getClockNotice();
+      }, 30000);
     } else {
       //alert(2)
       //let code = queryURL("code");
@@ -1857,6 +2102,7 @@ export default {
   destroyed() {
     window.clearInterval(this.refreshLocation);
     window.clearInterval(this.refreshInfo);
+    window.clearInterval(this.refreshInfo2);
   }
 };
 </script>
@@ -1868,7 +2114,7 @@ export default {
 }
 .marquee-div {
   position: fixed;
-  top: 60px;
+  top: 86px;
   left: 50%;
   z-index: 10;
   font-size: 14px;
@@ -1905,13 +2151,23 @@ export default {
   // height: 340px;
   // width: 300px;
 }
+.getwords-lucky-dialog{
+   background: url(../../assets/images/partybuild/getWordsLucky.png) no-repeat;
+    background-size: 100%;
+    color: white;
+}
 .getwords-div {
   padding-top: 160px;
 }
 .golden-words-long {
   color: #f8ec4c;
   font-size: 16px;
-  // font-weight: 700;
+  width: 90%;
+  margin: 0 auto;
+  text-align: left;
+}
+.golden-words-long-lucky {
+  font-size: 16px;
   width: 90%;
   margin: 0 auto;
   text-align: left;
@@ -1925,6 +2181,11 @@ export default {
 }
 .golden-article {
   padding-bottom: 10px;
+}
+.golden-article-lucky {
+  padding-bottom: 10px;
+  color: #f8ec4c;
+  font-size: 20px;
 }
 .location-intro {
   padding: 20px;
@@ -1999,7 +2260,7 @@ export default {
 }
 // 3个角标
 .right_top_ranking {
-  top: 12px;
+  top: 40px;
   right: 8%;
   background: url(../../assets/images/partybuild/ranking.png) no-repeat;
 }
@@ -2014,7 +2275,7 @@ export default {
   background: url(../../assets/images/partybuild/personal.png) no-repeat;
 }
 .left_top_info {
-  top: 12px;
+  top: 40px;
   left: 8%;
   background: url(../../assets/images/partybuild/info.png) no-repeat;
 }
@@ -2040,7 +2301,7 @@ export default {
   height: 100%;
   width: 60%;
   background: rgba(0, 0, 0, 0.6);
-  overflow-y: scroll;
+  // overflow-y: scroll;
 }
 .v-modal {
   // background: #fff;
@@ -2049,7 +2310,7 @@ export default {
   font-size: 20px;
   color: #ffffff;
   width: 100%;
-  margin-top: 70px;
+  margin-top: 60px;
   margin-bottom: 10px;
 }
 .popuPright_titl p {
@@ -2084,8 +2345,9 @@ export default {
 }
 .poRight_List {
   width: 100%;
-  float: right;
-  overflow: hidden;
+  // float: right;
+  // overflow: hidden;
+  height: 40px;
 }
 
 .poRight_List span {
@@ -2271,5 +2533,54 @@ export default {
 }
 .end .weui-dialog {
   background: none;
+}
+.noApp{
+  padding-top: 200px;
+  text-align: center;
+  color: rgb(153, 153, 153);
+  width: 100%;
+  position: fixed;
+  z-index: 1000000;
+  background: #e8e8e8;
+  height: 100%;
+}
+.golden-article-lucky-div{
+  height: 260px;
+  overflow-y: scroll;
+  padding-bottom: 4px;
+}
+.my-achieve span{
+    width: 35%;
+    display: inline-block;
+    font-size:14px;
+    color: white;
+}
+.my-achieve{
+    margin-bottom: 4px;
+    margin-top: 4px;
+}
+.rank-bottom{
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    padding-top: 2px;
+    margin-bottom: 2px;
+    border-top: 1px solid white;
+}
+.rank-total{
+    margin: 0 auto;
+    width: 90%;
+    padding-top: 2px;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #ccc;
+    padding-left: 25%;
+}
+.rank-div{
+  height: 55%;
+  overflow-y: scroll;
+}
+.pr-10{
+  padding-right: 10px;
 }
 </style>

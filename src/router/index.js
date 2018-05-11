@@ -5,10 +5,9 @@ import Router from 'vue-router'
 import duesIndex from '@/views/duesPay/duesIndex' // 缴费确认
 import duesHistory from '@/views/duesPay/duesHistory' // 历史缴费
 import duesInfo from '@/views/duesPay/duesInfo'  // 党费缴纳信息
+import duesOrg from '@/views/duesPay/duesOrg'  // 党费缴纳信息
 
 import partyIndex from '@/views/partyBuilding/index'
-import test from '@/views/partyBuilding/test'
-import Login from '@/views/login'
 Vue.use(Router)
 
 export default new Router({
@@ -62,14 +61,6 @@ export default new Router({
         title: '党建活动'
       }
     },
-    // {
-    //   path: '/login',
-    //   name: 'Login',
-    //   component: Login,
-    //   meta: {
-    //     title: '党建活动'
-    //   }
-    // },
     {path: '/', 
     name: 'partyIndex',
     component: partyIndex}
