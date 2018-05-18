@@ -32,7 +32,7 @@
           <!-- /4个角标结束 -->
           <!-- 打卡图标 -->
           <div class="clock-div">
-              <img v-if="!isAbleClock" src="../../assets/images/partybuild/unableClock.png">  
+              <img v-if="!isAbleClock" src="../../assets/images/partybuild/unableClock.png"  @click="postUnableClockPlace">  
               <img v-if="isAbleClock" src="../../assets/images/partybuild/ableClock.png" @click="postClockPlace">  
               <div v-if="!isAbleClock" class="unableClock-notice">当前范围不可打卡</div>
               <div v-if="isAbleClock" class="ableClock-notice">当前范围可打卡</div>
@@ -129,6 +129,9 @@
                       </p>
                       <p>                
                          4、徒步路线途径地点会有车辆来往且某些路段狭窄，请自行注意安全。
+                      </p>
+                      <p>                
+                         （提示：请用户确保打开手机定位功能，并授权随行办公APP使用位置服务）
                       </p>
                   </div>
                 
@@ -514,9 +517,9 @@ export default {
           place: "上海东方体育中心",
           isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
-          longitude: 121.48398, //经度
-          latitude: 31.161852, //纬度
-          point: new BMap.Point(121.48398, 31.161852),
+          longitude: 121.479245, //经度
+          latitude: 31.161589, //纬度
+          point: new BMap.Point(121.479245,31.161589),
           artNo: 1, //文章id
           artField: 101, //句子id
           artLucky:[],//幸运点句子
@@ -566,9 +569,9 @@ export default {
           place: "上海绿地万豪酒店",
           isLucky:false,//是否幸运点
           isClock: false, //是否打过卡
-          longitude: 121.479334, //经度
-          latitude: 31.197958, //纬度
-          point: new BMap.Point(121.479334, 31.197958),
+          longitude: 121.48071, //经度
+          latitude: 31.197516, //纬度
+          point: new BMap.Point(121.48071, 31.197516),
           artNo: 2, //文章id
           artField: 201, //句子id
           artLucky:[],//幸运点句子
@@ -1048,12 +1051,13 @@ export default {
           that.current_lng = wxPoint.lng;
           that.current_lat = wxPoint.lat;
           that.setCheckPosition(map);
-          that.$vux.loading.hide();
+          // that.$vux.loading.hide();
         },
         fail: function(res) {
           alert("请打开手机定位功能")
         }
       });
+      that.$vux.loading.hide();
       // let wxPoint = new BMap.Point(121.505454, 31.206506);
       // var mk = new BMap.Marker(wxPoint);
       // that.currentList[0] = mk;
@@ -1063,7 +1067,7 @@ export default {
       // that.current_lat = wxPoint.lat;
       // that.setCheckPosition(map);
       // that.$vux.loading.hide();
-      // alert('经度b：' + bd_lng);
+      //alert('经度b：' + bd_lng);
       // alert('纬度b：' + bd_lat);
       //高德地图
       // mapG.plugin('AMap.Geolocation', function() {
@@ -1979,6 +1983,7 @@ export default {
                 content: data.errMsg,
                 title: "登录失败！"
               });
+              that.$vux.loading.hide();
             }
             this.isloading = false;
           });
@@ -2031,6 +2036,9 @@ export default {
       var r = search.substr(1).match(reg);
       if (r != null) return unescape(r[2]);
       return null;
+    },
+    postUnableClockPlace(){
+      this.$vux.toast.text("再挪动一下试试哦", "middle");
     }
   },
   mounted() {
@@ -2225,7 +2233,7 @@ export default {
   height: 100%;
   .vux-close {
     position: absolute;
-    top: 50%;
+    top: 50%;mpm
     left: 50%;
     transform: translateX(-50%) translateY(-50%) scale(4);
     color: #000;
@@ -2235,6 +2243,7 @@ export default {
 // ---------------------
 .party-container {
   height: 100%;
+  user-select: none; -webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;
 }
 #map_container {
   width: 100%;
@@ -2396,7 +2405,7 @@ export default {
   margin-top: 20%;
 }
 .rules_ovf {
-  height: 240px;
+  height: 290px;
   overflow-y: auto;
 }
 .rules p {
@@ -2481,9 +2490,9 @@ export default {
   // margin-right: 10px;
 }
 .persKn_jg {
-  height: 360px;
+  height: 290px;
   overflow-y: auto;
-  padding-bottom: 20px;
+  // padding-bottom: 20px;
 }
 .persKn_j {
   padding-bottom: 12px;
